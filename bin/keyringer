@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+
+# TODO
+# - a lot of things
+
+def usage
+  puts "Usage:
+#{File.basename($0)} TODO! "
+  exit 1
+end
+
+def doSomething(someArguments)
+  puts "Doing something with #{someArguments}"
+end
+
+$:.unshift File.dirname(__FILE__) + '/../lib'
+#require 'keyringer'
+begin 
+  arg = ARGV.shift
+  if arg == '-test'
+    doSomething(ARGV)
+  else
+    usage
+  end
+rescue SystemExit => e
+  exit e.status
+rescue Exception => e
+  puts "Fatal error: #{e.inspect}"
+  exit 1
+end
+
