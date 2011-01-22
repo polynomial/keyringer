@@ -1,6 +1,6 @@
 require 'gpgme'
 
-module Schleuder
+module Keyringer
     # Wrapper for ruby-gpgme. Method naming is not strictly logical, this might
     # change but aliases will be set up then.
     class Crypt
@@ -12,19 +12,29 @@ module Schleuder
         @ctx.set_passphrase_cb(method(:passfunc))		
       end
 
+      # TODO: use a logging facility
+      def debug(message)
+        puts message
+      end
+
+      # TODO: use a logging facility
+      def error(message)
+        puts message
+      end
+
       # Verify a gpg-signature. Use +signed_string+ if the signature is
       # detached. Returns a GPGME::SignatureResult
       def verify(sig, signed_string='')
         in_signed = ''
         if signed_string.empty?
           # verify +sig+ as cleartext (aka pgp/inline) signature
-          Schleuder.log.debug 'No extra signed_string, verifying cleartext signature'
+          debug 'No extra signed_string, verifying cleartext signature'
           output = GPGME.verify(sig) do |sig|
             in_signed = sig
           end
         else
           # verify detached signature
-          Schleuder.log.debug 'Verifying detached signature'
+          debug 'Verifying detached signature'
           # Don't know why we need a GPGME::Data object this time but without gpgme throws exceptions
           plain = GPGME::Data.new
           GPGME.verify(sig, signed_string, plain) do |sig|
@@ -33,7 +43,7 @@ module Schleuder
           output = signed_string
           
         end
-        Schleuder.log.debug 'verify_result: ' + in_signed.inspect
+        debug 'verify_result: ' + in_signed.inspect
         
         [output, in_signed]
       end
@@ -53,14 +63,14 @@ module Schleuder
         unless str =~ /^-----BEGIN PGP MESSAGE-----/
           # match pgp-mime- and inline-pgp-signatures
           if str =~ /^-----BEGIN PGP SIG/
-            Schleuder.log.debug 'found signed, not encrypted message, verifying'
+            debug 'found signed, not encrypted message, verifying'
             output, in_signed = verify(str)
           else
-            Schleuder.log.debug 'found not signed, not encrypted message, returning input'
+            debug 'found not signed, not encrypted message, returning input'
             output = str
           end
         else
-          Schleuder.log.debug 'found pgp content, decrypting and verifying with gpgme'
+          debug 'found pgp content, decrypting and verifying with gpgme'
           in_encrypted = true
           output = GPGME.decrypt(str, :passphrase_callback => method(:passfunc)) do |sig|
             in_signed = sig
@@ -74,7 +84,7 @@ module Schleuder
       end
       
       # Encrypt a string to a single receiver and sign it. +receiver+ must be a
-      # Schleuder::Member
+      # Keyringer::Member
       def encrypt_str(str, receiver)
         # encypt and sign and return encrypted data as string
         key = receiver.key || receiver.email
@@ -93,7 +103,7 @@ module Schleuder
         pattern = "<#{pattern}>" if pattern =~ /.*@.*/
         k = list_keys(pattern)
         if k.length > 1
-          Schleuder.log.error "There's more than one key matching the pattern you gave me!\nPattern: #{pattern}\nkeys: #{k.inspect}"
+          error "There's more than one key matching the pattern you gave me!\nPattern: #{pattern}\nkeys: #{k.inspect}"
           false
         else
           k.first
