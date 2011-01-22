@@ -9,18 +9,23 @@ def usage
   exit 1
 end
 
-def doSomething(someArguments)
-  puts "Doing something with #{someArguments}"
+def doDecrypt(someArguments)
+  puts "Just decrypts"
+end
+
+def doWrapper(someArguments)
+  exec("keyringer #{someArguments}")
 end
 
 $:.unshift File.dirname(__FILE__) + '/../lib'
 #require 'keyringer'
 begin 
-  arg = ARGV.shift
-  if arg == '-test'
-    doSomething(ARGV)
+  keyring = ARGV.shift
+  action  = ARGV.shift
+  if action == 'decrypt'
+    doDecrypt(ARGV)
   else
-    usage
+    doWrapper(ARGV)
   end
 rescue SystemExit => e
   exit e.status
