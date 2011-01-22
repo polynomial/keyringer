@@ -1,4 +1,4 @@
-module Keyringer
+module Keyring
   class Fs
     def get_as_string(filename)
       data = ''

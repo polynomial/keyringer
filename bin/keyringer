@@ -9,31 +9,19 @@ def usage
   exit 1
 end
 
-# TODO: misc checks
-def doDecrypt(someArguments)
-  filename = ARGV[2]
-  file     = Keyringer::Fs.new()
-  content  = file.get_as_string(filename)
-
-  crypt    = Keyringer::Crypt.new(nil)
-  output   = crypt.decrypt(content)
-  puts output
-end
-
-def doWrapper(someArguments)
-  exec("keyringer " + ARGV.join(' '))
-end
-
 $:.unshift File.dirname(__FILE__) + '/../lib'
 require 'keyringer'
 begin 
-  keyring = ARGV[0]
-  action  = ARGV[1]
-  if action == 'decrypt'
-    doDecrypt(ARGV)
-  else
-    doWrapper(ARGV)
+  action = Keyringer.const_get(ARGV[1].capitalize)
+
+  if action.is_a?(Class)
+    instance = action.new
+    output   = instance.execute
+    puts output
   end
+rescue NameError
+  wrapper = Keyringer::BashWrapper.new
+  wrapper.execute
 rescue SystemExit => e
   exit e.status
 rescue Exception => e
