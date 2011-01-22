@@ -9,19 +9,26 @@ def usage
   exit 1
 end
 
+# TODO: misc checks
 def doDecrypt(someArguments)
-  puts "Just decrypts"
+  filename = ARGV[2]
+  file     = Keyringer::Fs.new()
+  content  = file.get_as_string(filename)
+
+  crypt    = Keyringer::Crypt.new(nil)
+  output   = crypt.decrypt(content)
+  puts output
 end
 
 def doWrapper(someArguments)
-  exec("keyringer #{someArguments}")
+  exec("keyringer " + ARGV.join(' '))
 end
 
 $:.unshift File.dirname(__FILE__) + '/../lib'
-#require 'keyringer'
+require 'keyringer'
 begin 
-  keyring = ARGV.shift
-  action  = ARGV.shift
+  keyring = ARGV[0]
+  action  = ARGV[1]
   if action == 'decrypt'
     doDecrypt(ARGV)
   else
