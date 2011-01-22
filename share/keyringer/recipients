@@ -4,7 +4,7 @@
 #
 
 # Load functions
-LIB="`dirname $0`/../../lib/keyringer"
+LIB="`dirname $0`/../../lib/bash"
 source "$LIB/functions" || exit 1
 
 # Command parser

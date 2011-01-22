@@ -134,7 +134,7 @@ ACTIONS="`dirname $(readlink -f $0)`/share/$NAME"
 export PREFERENCES="`dirname $CONFIG`/$KEYRING"
 
 # Load functions
-LIB="`dirname $(readlink -f $0)`/lib/$NAME/functions"
+LIB="`dirname $(readlink -f $0)`/lib/bash/functions"
 source "$LIB" || exit 1
 
 # Setup main configuration and load preferences

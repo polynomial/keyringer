@@ -140,7 +140,7 @@ function genpair_ssl {
 }
 
 # Load functions
-LIB="`dirname $0`/../../lib/keyringer"
+LIB="`dirname $0`/../../lib/bash"
 source "$LIB/functions" || exit 1
 
 # Aditional parameters
