@@ -1,7 +1,7 @@
 module Keyringer
   class Decrypt
     def execute
-      filename = ARGV[2]
+      filename = $args[0]
       crypt    = Keyring::Crypt.new
       output   = crypt.decrypt(filename)
       return output
