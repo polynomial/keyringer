@@ -26,7 +26,7 @@ module Keyringer
       options  = {}
       optparse = OptionParser.new do |opts|
         # Set a banner, displayed at the top of the help screen.
-        opts.banner = "Usage: #{File.basename($0)} [options] file1 file2 ..."
+        opts.banner = "Usage: #{File.basename($0)} <keyring> <action> [arguments]"
 
         # TODO: example option
         options[:verbose] = false
@@ -54,6 +54,10 @@ module Keyringer
       $args    = ARGV
       $keyring = $args.shift
       $action  = $args.shift
+
+      if !$keyring or !$action
+        opts.on
+      end
     end
   end
 end
