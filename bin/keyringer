@@ -22,10 +22,10 @@
 
 $:.unshift File.dirname(__FILE__) + '/../lib'
 require 'keyringer'
-require 'parser'
 
 begin 
-  action = Keyringer.const_get($action.capitalize)
+  Keyringer::Parser.new
+  action = Keyringer::Actions.const_get($action.capitalize)
 
   if action.is_a?(Class)
     instance = action.new
