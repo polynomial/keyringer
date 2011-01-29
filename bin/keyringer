@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Keyringer secret management system.
+# Keyringer key management system.
 #
 # Copyright (C) 2011 Keyringer Development Team.
 # 
