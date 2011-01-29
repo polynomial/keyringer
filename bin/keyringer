@@ -12,16 +12,18 @@ end
 $:.unshift File.dirname(__FILE__) + '/../lib'
 require 'keyringer'
 begin 
-  action = Keyringer.const_get(ARGV[1].capitalize)
-
-  if action.is_a?(Class)
-    instance = action.new
-    output   = instance.execute
-    puts output
+  begin
+    action = Keyringer.const_get(ARGV[1].capitalize)
+  rescue NameError
+    wrapper = Keyringer::BashWrapper.new
+    wrapper.execute
+  else
+    if action.is_a?(Class)
+      instance = action.new
+      output   = instance.execute
+      puts output
+    end
   end
-rescue NameError
-  wrapper = Keyringer::BashWrapper.new
-  wrapper.execute
 rescue SystemExit => e
   exit e.status
 rescue Exception => e
