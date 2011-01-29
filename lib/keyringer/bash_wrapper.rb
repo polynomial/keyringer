@@ -1,7 +1,7 @@
 module Keyringer
   class BashWrapper
     def execute
-      exec("keyringer " + ARGV.join(' '))
+      exec("keyringer #{$keyring} #{$action} " + $args.join(' '))
     end
   end
 end
