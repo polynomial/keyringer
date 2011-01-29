@@ -1,15 +1,15 @@
 module Keyringer
+  module Actions
   class Recipients
     def execute
-      subCommand = ARGV[2]
-      parameters = ARGV[3..-1]
+      subCommand = $args[0]
 
       recipients    = Keyring::Recipients.new
       
       if subCommand == "add"
-        recipients.addRecipient(ARGV[3], ARGV[4])
+        recipients.addRecipient($args[1], $args[2])
       elsif subCommand == "remove"
-        recipients.removeRecipient(ARGV[3])
+        recipients.removeRecipient($args[1])
       elsif subCommand == "list"
         recipients.listRecipients().each() do |recipient|
           puts("#{recipient.email}     #{recipient.keySignature}")
@@ -20,5 +20,6 @@ module Keyringer
       
       return ""
     end
+  end
   end
 end
