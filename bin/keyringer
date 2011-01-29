@@ -25,20 +25,25 @@ require 'keyringer'
 
 begin 
   Keyringer::Parser.new
-  action = Keyringer::Actions.const_get($action.capitalize)
-
-  if action.is_a?(Class)
-    instance = action.new
-    output   = instance.execute
-    puts output
+  puts "Performing action #{$action.capitalize}"
+  begin
+    action = Keyringer::Actions.const_get($action.capitalize)
+  rescue NameError
+    wrapper = Keyringer::BashWrapper.new
+    wrapper.execute
+  else
+    if action.is_a?(Class)
+      instance = action.new
+      output   = instance.execute
+      puts output
+    end
   end
-rescue NameError
-  wrapper = Keyringer::BashWrapper.new
-  wrapper.execute
 rescue SystemExit => e
   exit e.status
 rescue Exception => e
   puts "Fatal error: #{e.inspect}"
+  puts e.backtrace.join("\n")
+
   exit 1
 end
 
