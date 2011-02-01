@@ -22,6 +22,11 @@ module Keyringer
   module Actions
     class Init
       def initialize
+        path = Keyring::UserConfig.instance.path
+        Backend::Git.new
+      end
+
+      def execute
       end
     end
   end

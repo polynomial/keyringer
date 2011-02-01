@@ -10,11 +10,11 @@ Requirements
 
 Keyringer needs:
 
-  - Bash - http://tiswww.case.edu/php/chet/bash/bashtop.html
-  - Git - http://git-scm.com
-  - GNU Privacy Guard - http://gnupg.org
-  - OpenSSL - http://www.openssl.org
-  - Grep, awk, tail, cut, sed and other GNU tools
+  - Ruby
+  - Rubygems and the following gems:
+    - git
+    - gpgme
+    - parseconfig
 
 Installation
 ------------
@@ -217,7 +217,7 @@ There are lots of things that can be enhanced, like:
 
   - Hidden recipient support (including recipients file).
 
-  - Rewrite using an object-oriented programming language?
+  - Rewrite using an object-oriented programming language.
 
   - Tab completion subcommand support for popular shells like bash.
 
@@ -228,9 +228,4 @@ There are lots of things that can be enhanced, like:
   - Leave key labels out of recipients file.
 
   - List available subommands.
-
-Development
------------
-
-Developers needed! :)
 
