@@ -25,6 +25,7 @@ require 'git'
 
 # internal requires
 $:.unshift File.dirname(__FILE__)
+require 'backend/fs'
 require 'backend/git'
 require 'backend/crypt'
 require 'backend/recipients_store'

@@ -18,7 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-module Keyring
+module Backend
   class Fs
     def get_as_string(filename)
       data = ''
