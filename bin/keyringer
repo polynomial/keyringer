@@ -25,7 +25,6 @@ require 'keyringer'
 
 begin 
   Keyringer::Parser.new
-  Keyringer::Checker.new
   puts "Performing action #{$action.capitalize}"
   begin
     action = Keyringer::Actions.const_get($action.capitalize)

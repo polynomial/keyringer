@@ -19,10 +19,12 @@
 #
 
 module Keyringer
-  class Checker
-    def initialize
-      path = Keyring::UserConfig.instance.path
-      raise "No path configuration for #{$keyring} keyring." if path.nil?
+  module Actions
+    class Ls
+      def execute
+        path = Keyring::UserConfig.instance.path
+        Dir.entries(path + '/keys').join(' ')
+      end
     end
   end
 end

@@ -23,10 +23,14 @@ module Keyring
     include Singleton
 
     def initialize
+      self.load
+      self.check
+    end
+
+    def load
       @user_config = ENV['HOME'] + '/.keyringer/config'
       @keyrings    = Backend::parse_config(@user_config)
       @path        = @keyrings.get_value($keyring)
-      raise "No path configuration for #{$keyring} keyring." if @path.nil?
     end
 
     def keyrings
@@ -35,6 +39,10 @@ module Keyring
 
     def path
       @path
+    end
+
+    def check
+      raise "No keydir configured for #{$keyring} keyring." if @path.nil?
     end
   end
 end
