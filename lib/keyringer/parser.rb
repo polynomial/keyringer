@@ -29,16 +29,16 @@ module Keyringer
         opts.banner = "Usage: #{File.basename($0)} <keyring> <action> [arguments]"
 
         # TODO: example option
-        options[:verbose] = false
-        opts.on( '-v', '--verbose', 'Output more information' ) do
-          options[:verbose] = true
-        end
+        #options[:verbose] = false
+        #opts.on( '-v', '--verbose', 'Output more information' ) do
+          #options[:verbose] = true
+        #end
 
         # TODO: example option
-        options[:logfile] = nil
-        opts.on( '-l', '--logfile FILE', 'Write log to FILE' ) do |file|
-          options[:logfile] = file
-        end
+        #options[:logfile] = nil
+        #opts.on( '-l', '--logfile FILE', 'Write log to FILE' ) do |file|
+          #options[:logfile] = file
+        #end
 
         # This displays the help screen
         opts.on( '-h', '--help', 'Display this help message' ) do

@@ -18,16 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# internal requires
-$:.unshift File.dirname(__FILE__)
-require 'keyring'
-require 'keyringer/bash_wrapper'
-require 'keyringer/parser'
-require 'keyringer/checker'
-require 'keyringer/console'
-require 'keyringer/actions/decrypt'
-require 'keyringer/actions/recipients'
-
 module Keyringer
-  VERSION = '2.0-alpha'
+  require 'singleton'
+
+  class Console
+    include Singleton
+    def initialize
+    end
+  end
 end
