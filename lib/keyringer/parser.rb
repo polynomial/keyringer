@@ -55,7 +55,7 @@ module Keyringer
       $keyring = $args.shift
       $action  = $args.shift
 
-      if !$keyring or !$action
+      unless $action
         puts optparse
         exit
       end
