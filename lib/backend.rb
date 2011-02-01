@@ -18,7 +18,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# gems
+require 'rubygems'
+require 'parseconfig'
+
 # internal requires
 $:.unshift File.dirname(__FILE__)
 require 'backend/crypt'
 require 'backend/recipients_store'
+require 'backend/parse_config'

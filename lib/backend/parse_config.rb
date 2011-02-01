@@ -18,10 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# internal requires
-$:.unshift File.dirname(__FILE__)
-require 'backend'
-require 'keyring/crypt'
-require 'keyring/fs'
-require 'keyring/recipients'
-require 'keyring/user_config'
+module Backend
+  # A wrapper around ParseConfig
+  def self.parse_config(config)
+    ParseConfig.new(config)
+  end
+end

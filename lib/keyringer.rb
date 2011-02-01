@@ -18,6 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# general requires
+require 'singleton'
+
 # internal requires
 $:.unshift File.dirname(__FILE__)
 require 'keyring'
@@ -27,6 +30,7 @@ require 'keyringer/checker'
 require 'keyringer/console'
 require 'keyringer/actions/decrypt'
 require 'keyringer/actions/recipients'
+require 'keyringer/actions/init'
 
 module Keyringer
   VERSION = '2.0-alpha'

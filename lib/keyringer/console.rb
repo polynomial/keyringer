@@ -19,8 +19,6 @@
 #
 
 module Keyringer
-  require 'singleton'
-
   class Console
     include Singleton
     def initialize

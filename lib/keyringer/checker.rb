@@ -21,6 +21,8 @@
 module Keyringer
   class Checker
     def initialize
+      path = Keyring::UserConfig.instance.path
+      raise "No path configuration for #{$keyring} keyring." if path.nil?
     end
   end
 end
