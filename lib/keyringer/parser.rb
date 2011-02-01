@@ -51,7 +51,7 @@ module Keyringer
       optparse.parse!
 
       # Parse positional arguments
-      $args    = ARGV
+      $args    = ARGV.dup
       $keyring = $args.shift
       $action  = $args.shift
 
