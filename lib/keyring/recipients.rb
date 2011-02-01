@@ -20,8 +20,9 @@
 
 module Keyring
   class Recipients
-    def initialize(aBaseDirectory = '..')
-      @recipientsStore = Backend::RecipientsStore.new(aBaseDirectory)
+    def initialize
+      path = UserConfig.instance.path
+      @recipientsStore = Backend::RecipientsStore.new(path)
 
     end
     def addRecipient(anEmail, aKeySignature)
