@@ -20,11 +20,20 @@
 
 module Keyring
   class Crypt
+    def initialize
+      @keyStore = UserConfig.instance.path + '/keys'
+    end
+
     def decrypt(filename)
       file    = Backend::Fs.new()
       content = file.get_as_string(filename)
       crypt   = Backend::Crypt.new(nil)
       return crypt.decrypt(content)
+    end
+
+    def decryptKey(name)
+      filename = @keyStore + '/' + name + '.asc'
+      decrypt(filename)
     end
   end
 end

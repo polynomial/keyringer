@@ -22,10 +22,9 @@ module Keyringer
   module Actions
     class Decrypt
       def execute
-        path     = Keyring::UserConfig.instance.path
-        filename = path + '/keys/' + $args[0] + '.asc'
-        crypt    = Keyring::Crypt.new
-        crypt.decrypt(filename)
+        raise "Missing key argument" if $args[0].nil?
+        crypt = Keyring::Crypt.new
+        crypt.decryptKey($args[0])
       end
     end
   end
