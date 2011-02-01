@@ -22,11 +22,8 @@ module Keyringer
   module Actions
     class Ls
       def execute
-        path  = Keyring::UserConfig.instance.path
-        files = Dir.entries(path + "/keys/#{$args[0]}")
-        files.delete('.')
-        files.delete('..')
-        files.join(' ')
+        fs = Keyring::Fs.new
+        fs.listKeys($args[0]).join(' ')
       end
     end
   end

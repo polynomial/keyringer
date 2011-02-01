@@ -21,6 +21,7 @@
 # internal requires
 $:.unshift File.dirname(__FILE__)
 require 'backend'
+require 'keyring/fs'
 require 'keyring/crypt'
 require 'keyring/recipients'
 require 'keyring/user_config'
