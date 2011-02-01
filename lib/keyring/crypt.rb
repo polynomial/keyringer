@@ -25,10 +25,10 @@ module Keyring
     end
 
     def decrypt(filename)
-      file    = Backend::Fs.new()
-      content = file.get_as_string(filename)
+      file    = Backend::Fs.new
       crypt   = Backend::Crypt.new(nil)
-      return crypt.decrypt(content)
+      content = file.get_as_string(filename)
+      crypt.decrypt(content)
     end
 
     def decryptKey(name)
