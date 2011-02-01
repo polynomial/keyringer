@@ -23,7 +23,7 @@ module Keyringer
     class Ls
       def execute
         path = Keyring::UserConfig.instance.path
-        Dir.entries(path + '/keys').join(' ')
+        Dir.entries(path + "/keys/#{$args[0]}").join(' ')
       end
     end
   end
