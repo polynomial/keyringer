@@ -31,9 +31,13 @@ module Keyring
       crypt.decrypt(content)
     end
 
+    # Determine the file name for a given key
+    def keyFile(name)
+      @keyStore + '/' + File.dirname(name) + '/' + File.basename(name, '.asc') + '.asc'
+    end
+
     def decryptKey(name)
-      filename = @keyStore + '/' + name + '.asc'
-      decrypt(filename)
+      decrypt(keyFile(name))
     end
   end
 end
