@@ -21,12 +21,10 @@
 module Keyringer
   module Actions
     class Init
-      def initialize
-        path = Keyring::UserConfig.instance.path
-        Backend::Git.new
-      end
-
       def execute
+        raise "Missing argument: path" if $args[0].nil?
+        repository = Keyring::Repository.new
+        repository.create($args[0], $args[1])
       end
     end
   end

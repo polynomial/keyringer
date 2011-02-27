@@ -28,5 +28,13 @@ module Backend
         false
       end
     end
+
+    def init(path)
+      @git = ::Git.init(path)
+    end
+
+    def clone(url, path)
+      @git = ::Git.clone(url, path)
+    end
   end
 end

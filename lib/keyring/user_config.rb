@@ -22,15 +22,22 @@ module Keyring
   class UserConfig
     include Singleton
 
-    def initialize
-      self.load
+    def initialize(path = nil)
+      self.loadMainConfig
       self.check
     end
 
-    def load
+    def loadMainConfig
       @user_config = ENV['HOME'] + '/.keyringer/config'
       @keyrings    = Backend::parse_config(@user_config)
       @path        = @keyrings.get_value($keyring)
+    end
+
+    # TODO
+    def saveMainConfig
+      # TODO: copy each keyring definition to a hash
+      # update path of the current keyring
+      file = open(@user_config, 'w')
     end
 
     def keyrings
@@ -41,7 +48,13 @@ module Keyring
       @path
     end
 
+    def setPath(path)
+      @path = path
+      saveMainConfig
+    end
+
     def check
+      raise "Not a directory: #{@path}" if !File::directory?(@path)
       raise "No keydir configured for #{$keyring} keyring." if @path.nil?
     end
   end

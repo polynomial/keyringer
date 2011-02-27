@@ -22,7 +22,7 @@ module Keyringer
   module Actions
     class Decrypt
       def execute
-        raise "Missing key argument" if $args[0].nil?
+        raise "Missing argument: key" if $args[0].nil?
         crypt = Keyring::Crypt.new
         crypt.decryptKey($args[0])
       end

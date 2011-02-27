@@ -48,10 +48,18 @@ module Backend
       write()
     end
 
+    def getPath()
+      File.join(@baseDir, "config", "recipients")
+    end
+
+    def hasPath?()
+      File.directory?(getPath())
+    end
+
     private
 
     def read()
-      fileName = File.join(@baseDir, "config", "recipients")
+      fileName = getPath()
       file = File.new(fileName, "r")
       begin
         recipients = []
@@ -72,7 +80,7 @@ module Backend
     end
 
     def write()
-      fileName = File.join(@baseDir, "config", "recipients")
+      fileName = getPath()
       file = File.new(fileName, "w")
       begin
         @recipients.each do |recipient|

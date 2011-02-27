@@ -20,6 +20,7 @@
 
 # general requires
 require 'singleton'
+require 'pathname'
 
 # internal requires
 $:.unshift File.dirname(__FILE__)
