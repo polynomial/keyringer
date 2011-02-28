@@ -36,5 +36,13 @@ module Backend
     def clone(url, path)
       @git = ::Git.clone(url, path)
     end
+
+    def add(pattern)
+       @git.add(pattern)
+    end
+
+    def commit(message)
+      @git.commit(message)
+    end
   end
 end

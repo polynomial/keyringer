@@ -56,6 +56,12 @@ module Backend
       File.directory?(getPath())
     end
 
+    def create()
+      fileName = getPath()
+      file     = File.new(fileName, "w")
+      file.close
+    end
+
     private
 
     def read()

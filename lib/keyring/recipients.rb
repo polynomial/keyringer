@@ -20,10 +20,14 @@
 
 module Keyring
   class Recipients
-    def initialize
-      path = UserConfig.instance.path
-      @recipientsStore = Backend::RecipientsStore.new(path)
+    def initialize(path = nil)
+      if !path
+        path = UserConfig.instance.path
+      end
 
+      # Load backend and ensure that the file exists
+      @recipientsStore = Backend::RecipientsStore.new(path)
+      @recipientsStore.create()
     end
     def addRecipient(anEmail, aKeySignature)
 

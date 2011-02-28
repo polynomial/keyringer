@@ -25,32 +25,44 @@ module Keyring
     end
 
     # Check for a valid repository
-    # TODO: check for repository version, .git
-    #       and configuration.
     def exists?(path)
-      File.directory?(path)
+      File.directory?(path + '/.git')
+    end
+
+    def getConfigPath(path)
+      path + '/config'
     end
 
     def create(path, url = nil)
-      keys_path = Keys.getPath(path)
+      keys_path   = Keys.getPath(path)
+      config_path = getConfigPath(path)
 
-      if !exists?(path)
-        if url
-          @git.clone(url, path)
-        else
-          @git.init(path)
-        end
+      if url
+        raise "Path #{path} exists and is a git repository" if exists?(path)
+        @git.clone(url, path)
+      else
+        @git.init(path)
       end
+
+      # Setup folders
+      FileUtils.mkdir_p keys_path
+      FileUtils.mkdir_p config_path
+      FileUtils.chmod(0700, path)
 
       # Reparse basedir to force absolute folder
       path = Pathname.new(path).realpath
+      
+      # Create recipients
+      recipients = Keyring::Recipients.new(path)
 
       # TODO: if needed:
-      # create structure
-      # recipients, options, version, keys
+      # options, version, keys
       # save user config
-      # issue initial commit
-      # set permissions
+
+      @git.add('.')
+
+      # TODO: commit just if the repository status has changed
+      @git.commit('Importing')
     end
   end
 end
