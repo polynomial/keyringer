@@ -118,15 +118,6 @@ Keyringer comes with a simple git wrapper to ease common management tasks:
     keyringer <keyring> git push keyringer master
     keyringer <keyring> git pull
 
-Managing puppet node keys
--------------------------
-
-Keyringer is able to manage node keys for puppet nodes. First add the puppet
-main and key folders into your keyring configuration:
-
-    keyringer <keyring> preferences add PUPPET=/path/to/puppet/config
-    keyringer <keyring> preferences add PUPPET_KEYS=/path/to/puppet/keys
-
 Configuration files, preferences and options
 --------------------------------------------
 
@@ -138,6 +129,14 @@ Configuration files, preferences and options
 
   3. Custom keyring options: $KEYRING_FOLDER/config/options: managed by
      "keyringer <keyring> options".
+
+Using a non-default OpenPGP key
+-------------------------------
+
+If you want to use a different key other than your default for a given
+keyringer, use
+
+    keyringer <keyring> preferences add KEYID=FINGERPRINT
 
 Notes
 -----
