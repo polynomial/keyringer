@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Encrypt files to multiple recipients using SSSS.
+#
+
+# Load functions
+LIB="`dirname $0`/../../lib/keyringer/functions"
+source "$LIB" || exit 1
+
+# Check requirements
+ssss="`which ssss`";
+if [ "$?" != "0" ]; then
+  echo "Please install ssss first."
+  exit 1
+fi
+
+# TODO

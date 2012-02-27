@@ -76,6 +76,32 @@ Fill it with your friends key IDs. Now encrypt a secret just for then:
 In other words, if keyringer finds a recipient file matching a given path,
 it will use it instead of the global recipients file.
 
+SSSS Support
+------------
+
+Say you have the following recipients:
+
+  - admins-1
+  - admins-2
+  - admins-3
+  - admins-4
+
+And you want to split a secret among these groups.
+
+    keyringer <keyring> ssss-split <secret-name> <threshold> 4 [options]
+
+This will generate 4 files in you keyringer:
+
+    keys/admins-1/secret-name.asc
+    keys/admins-2/secret-name.asc
+    keys/admins-3/secret-name.asc
+    keys/admins-4/secret-name.asc
+
+Each of them has one different ssss share. Decryption of one sharing
+is straightforward. Say you're on admins-1 group:
+
+    keyringer <keyring> decrypt admins-1/secret-name
+
 Managing keys
 ----------------
 
