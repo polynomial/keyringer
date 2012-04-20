@@ -79,28 +79,38 @@ it will use it instead of the global recipients file.
 SSSS Support
 ------------
 
-Say you have the following recipients:
+SSSS support comes with "ssss group" files where each file (say
+config/ssss/ssss-groupA) has one recipient file per line.
 
-  - admins-1
-  - admins-2
-  - admins-3
-  - admins-4
+Command line syntax is:
 
-And you want to split a secret among these groups.
+   keyringer <keyring> ssss-split <secret-name> [ssss-group] [ssss-options]
 
-    keyringer <keyring> ssss-split <secret-name> <threshold> 4 [options]
+So if we have:
 
-This will generate 4 files in you keyringer:
+  config/recipients/recipientsA:
 
-    keys/admins-1/secret-name.asc
-    keys/admins-2/secret-name.asc
-    keys/admins-3/secret-name.asc
-    keys/admins-4/secret-name.asc
+    user1@domain
+    user2@domain
 
-Each of them has one different ssss share. Decryption of one sharing
-is straightforward. Say you're on admins-1 group:
+  config/recipients/recipientsB
 
-    keyringer <keyring> decrypt admins-1/secret-name
+    user3@domain
+    user4@domain
+
+  config/ssss/ssss-groupA:
+
+    recipientsA
+    recipientsB
+
+Then the following command
+
+   keyringer <keyring> ssss-split secret-data ssss-groupA
+
+would split some data into distinct files:
+
+   keys/recipientsA/secret-data.asc: encrypted to user{1,2}@domain
+   keys/recipientsB/secret-data.asc: encrypted to user{3,4}@domain
 
 Managing keys
 ----------------
