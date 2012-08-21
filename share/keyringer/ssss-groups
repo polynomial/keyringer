@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Manage SSSS groups.
+#
+
+# Load functions
+LIB="`dirname $0`/../../lib/keyringer/functions"
+source "$LIB" || exit 1
+
+# TODO
