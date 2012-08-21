@@ -1,0 +1,39 @@
+This work was packaged for Debian by:
+
+    Silvio Rhatto <rhatto@riseup.net> on Tue, 26 Jun 2012 16:33:57 -0300
+
+It was downloaded from:
+
+    https://git.sarava.org/?p=keyringer.git;a=summary
+
+Upstream Author(s):
+
+    Silvio Rhatto <rhatto@riseup.net>
+    Daniel Kahn Gillmor <dkg@fifthhorseman.net>
+    Jamie McClelland <jm@mayfirst.org>
+
+Copyright:
+
+    <Copyright (C) 2009-2012 Silvio Rhatto>
+    <Copyright (C) 2010 Daniel Kahn Gillmor>
+    <Copyright (C) 2012 Jamie McClelland>
+
+License:
+
+    GNU AFFERO GENERAL PUBLIC LICENSE Version 3, 19 November 2007
+
+The Debian packaging is:
+
+    Copyright (C) 2012 Silvio Rhatto <rhatto@riseup.net>
+
+# Please chose a license for your packaging work. If the program you package
+# uses a mainstream license, using the same license is the safest choice.
+# Please avoid to pick license terms that are more restrictive than the
+# packaged work, as it may make Debian's contributions unacceptable upstream.
+# If you just want it to be GPL version 3, leave the following lines in.
+
+and is licensed under the GPL version 3,
+see "/usr/share/common-licenses/GPL-3".
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

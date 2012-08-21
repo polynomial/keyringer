@@ -225,15 +225,45 @@ function keyringer_set_env {
 
 # Configuration version tracking to help keyring upgrades
 function keyringer_check_version {
+  if [ "$KEYRINGER_CHECK_VERSION" == "false" ]; then
+    return
+  fi
+
   if [ ! -f "$VERSION_INFO" ]; then
-    echo "Creating configuration version file..."
-    echo 0 > "$VERSION_INFO"
-    if keyringer_is_git "$BASEDIR"; then
-      keyringer_exec git "$BASEDIR" add config/version
+    echo "Configuration version file not found, trying to pull from remotes..."
+    # Do not use keyringer_exec as it would trigger keyringer_check_version again
+    ( cd "$BASEDIR" && git pull )
+
+    if [ ! -f "$VERSION_INFO" ]; then
+      echo "Creating configuration version file..."
+      echo 0 > "$VERSION_INFO"
+      if keyringer_is_git "$BASEDIR"; then
+        keyringer_exec git "$BASEDIR" add config/version
+        echo "Pushing configuration version file to remotes..."
+        for remote in "$BASEDIR/.git/refs/remotes/*"; do
+          keyringer_exec git "$BASEDIR" push $remote master
+        done
+      fi
     fi
   fi
 
   VERSION="`cat $VERSION_INFO`"
+
+  # Check if config version is supported by keyringer
+  if [ "$VERSION" != "$KEYRINGER_VERSION" ]; then
+    echo "Configuration version differs from keyringer version, trying to pull from remotes"
+    # Do not use keyringer_exec as it would trigger keyringer_check_version again
+    ( cd "$BASEDIR" && git pull )
+
+    if [ "$VERSION" != "$KEYRINGER_VERSION" ]; then
+      NEWEST="`echo -e "$VERSION\n$KEYRINGER_VERSION" | sort -V | tail -n 1`"
+      if [ "$NEWEST" == "$VERSION" ]; then
+        echo "Fatal: keyringer version: $KEYRINGER_VERSION / config version: $VERSION"
+        echo "Please upgrade your keyringer application"
+        exit 1
+      fi
+    fi
+  fi
 }
 
 # Configuration upgrades
@@ -248,7 +278,10 @@ function keyringer_upgrade {
       keyringer_exec git "$BASEDIR" add $RECIPIENTS_BASE/default
       keyringer_exec git "$BASEDIR" add config/version
       keyringer_exec git "$BASEDIR" commit -m "Config-upgrade-0.1"
-      echo "Upgrade to version 0.1 completed"
+      echo "Upgrade to version 0.1 completed, pushing to remotes..."
+      for remote in "$BASEDIR/.git/refs/remotes/*"; do
+        keyringer_exec git "$BASEDIR" push $remote master
+      done
     fi
 
     # Update version information
@@ -307,6 +340,10 @@ function keyringer_action_usage {
 
 # Check recipients
 function keyringer_check_recipients {
+  if [ "$KEYRINGER_CHECK_RECIPIENTS" == "false" ]; then
+    return
+  fi
+
   # Check if recipients file is empty.
   if [ "`grep -vE "^#|^$" "$RECIPIENTS"/* | wc -l`" == 0 ] && [ "$SUBCOMMAND" != "edit" ]; then
     echo "Fatal: no recipients configured for this keyring."
@@ -359,12 +396,17 @@ function keyringer_set_recipients {
     keyringer_set_default_recipients
   else
     candidate="$1"
+    candidate_no_extension="`echo $1 | sed -e 's/.asc$//'`"
 
     # Find the first matching recipient
     while [ ! -z "$candidate" ] && [ "$candidate" != "." ] && [ "$candidate" != "/" ]; do
       if [ -e "$RECIPIENTS/$candidate" ]; then
         RECIPIENTS_FILE="$RECIPIENTS/$candidate"
         RECIPIENTS_FILE_BASE="$RECIPIENTS_BASE/$candidate"
+        return
+      elif [ -e "$RECIPIENTS/$candidate_no_extension" ]; then
+        RECIPIENTS_FILE="$RECIPIENTS/$candidate_no_extension"
+        RECIPIENTS_FILE_BASE="$RECIPIENTS_BASE/$candidate_no_extension"
         return
       fi
 
