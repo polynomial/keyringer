@@ -7,48 +7,62 @@
 LIB="`dirname $0`/../../lib/keyringer/functions"
 source "$LIB" || exit 1
 
+# Encrypt a secret
+function keyringer_encrypt {
+  # Set recipients file
+  keyringer_set_recipients "$FILE"
+
+  # Encrypt
+  mkdir -p "$KEYDIR/`dirname $FILE`"
+
+  if [ "$BASENAME" == "encrypt" ]; then
+    # Only display directions if we're running encrypt, not encrypt-batch
+    if [ "$UNENCRYPTED_FILE" == "-" ]; then
+      echo "Type your message and finish your input with EOF (Ctrl-D)."
+    fi
+  fi
+
+  $GPG --use-agent --armor -e -s $(keyringer_recipients "$RECIPIENTS_FILE") --yes --output "$KEYDIR/$FILE" $UNENCRYPTED_FILE
+
+  err="$?"
+
+  if [ "$err" != "0" ]; then
+    exit "$err"
+  fi
+
+  if [ "$UNENCRYPTED_FILE" != "-" ]; then
+    echo "Now make to wipe the non-encrypted $UNENCRYPTED_FILE."
+  fi
+
+  # Stage
+  if [ -d "$BASEDIR/.git" ]; then
+    keyringer_exec git "$BASEDIR" add "keys/$FILE"
+  fi
+
+  exit "$?"
+}
+
 # Aditional parameters
 if [ ! -z "$3" ]; then
   UNENCRYPTED_FILE="$2"
   keyringer_get_new_file "$3"
 
-  if [ ! -f "$UNENCRYPTED_FILE" ]; then
-    echo "Error: cannot encrypted $UNENCRYPTED_FILE: file not found."
+  if [ ! -e "$UNENCRYPTED_FILE" ]; then
+    echo "Error: cannot encrypt $UNENCRYPTED_FILE: file not found."
     exit 1
   fi
+
+  # TODO: $FILE shall be prepended by unencrypted file's relative pathname
+  if [ -d "$UNENCRYPTED_FILE" ];
+    for UNENCRYPTED_FILE in `find -type f $INPUTS`; do
+      keyringer_encrypt
+    done
+  else
+    keyringer_encrypt
+  fi
+
 else
   UNENCRYPTED_FILE="-"
   keyringer_get_new_file "$2"
+  keyringer_encrypt
 fi
-
-# Set recipients file
-keyringer_set_recipients "$FILE"
-
-# Encrypt
-mkdir -p "$KEYDIR/`dirname $FILE`"
-
-if [ "$BASENAME" == "encrypt" ]; then
-  # Only display directions if we're running encrypt, not encrypt-batch
-  if [ "$UNENCRYPTED_FILE" == "-" ]; then
-    echo "Type your message and finish your input with EOF (Ctrl-D)."
-  fi
-fi
-
-$GPG --use-agent --armor -e -s $(keyringer_recipients "$RECIPIENTS_FILE") --yes --output "$KEYDIR/$FILE" $UNENCRYPTED_FILE
-
-err="$?"
-
-if [ "$err" != "0" ]; then
-  exit "$err"
-fi
-
-if [ "$UNENCRYPTED_FILE" != "-" ]; then
-  echo "Now make to wipe the non-encrypted $UNENCRYPTED_FILE."
-fi
-
-# Stage
-if [ -d "$BASEDIR/.git" ]; then
-  keyringer_exec git "$BASEDIR" add "keys/$FILE"
-fi
-
-exit "$?"
