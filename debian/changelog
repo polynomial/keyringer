@@ -1,3 +1,11 @@
+keyringer (0.2.6-1) unstable; urgency=low
+
+  * Adding debian/gbp.conf
+  * Updating development guidelines for a pure pristine-tar build
+  * Packaging upstream 0.2.6
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Fri, 04 Oct 2013 13:05:53 -0300
+
 keyringer (0.2.5-1) unstable; urgency=low
 
   * Packaging upstream 0.2.5
