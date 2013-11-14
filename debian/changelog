@@ -1,3 +1,9 @@
+keyringer (0.2.8-1) unstable; urgency=low
+
+  * Keyringer 0.2.8
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Thu, 14 Nov 2013 19:02:44 -0200
+
 keyringer (0.2.7-1~1.gbp39cba8) unstable; urgency=low
 
   * Adding wipe into package recommendations
