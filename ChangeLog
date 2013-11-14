@@ -1,3 +1,25 @@
+2013-11-14 - 0.2.7 Silvio Rhatto  <rhatto@riseup.net>
+
+	Ramdisk check for temporary folders (closes #13)
+
+	Shred of temporary files (closes #27)
+
+	Encrypt/open improvements (closes #9)
+
+	Initialization now asks user to edit the default preferences file
+
+	Usage improvements
+
+	Added keyringer.pot for easy manpage translation (closes #5)
+
+	Changed encrypt syntax
+
+	Fix handing of file names with spaces (#20)
+
+	Manpage enhancements and english review (#5)
+
+	Strict FHS compliance (closes #18)
+
 2013-10-04 - 0.2.6 Silvio Rhatto  <rhatto@riseup.net>
 
 	Removing debian specifics from the master branch (#1)

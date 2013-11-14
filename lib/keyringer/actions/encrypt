@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# Encrypt files to multiple recipients.
+#
+
+# Load functions
+LIB="`dirname $0`/../functions"
+source "$LIB" || exit 1
+
+# Usage
+function keyringer_usage_encrypt {
+  echo "Usage: keyringer <keyring> $BASENAME <secret> [file]"
+}
+
+# Alias for keyringer_usage_encrypt
+function keyringer_usage_encrypt_batch {
+  keyringer_usage_encrypt $*
+}
+
+# Usage
+if [ -z "$2" ]; then
+  keyringer_action_usage
+  exit 1
+fi
+
+# Aditional parameters
+if [ ! -z "$3" ]; then
+  # Set secret name and original file
+  FILE="$2"
+  shift 2
+  UNENCRYPTED_FILE="$*"
+
+  # Get original file EXTENSION
+  FILENAME="$(basename "$UNENCRYPTED_FILE")"
+  EXTENSION="${FILENAME##*.}"
+
+  # Append file extension in the secret name
+  #
+  # Useful when opening files and the application needs the
+  # extension to guess the file type.
+  if ! echo $FILE | grep -q -e "\.$EXTENSION$"; then
+    FILE="$FILE.$EXTENSION"
+  fi
+
+  keyringer_get_new_file $FILE
+
+  if [ ! -f "$UNENCRYPTED_FILE" ]; then
+    echo "Error: cannot encrypt $UNENCRYPTED_FILE: file not found."
+    exit 1
+  fi
+else
+  UNENCRYPTED_FILE="-"
+  shift
+  keyringer_get_new_file $*
+fi
+
+# Set recipients file
+keyringer_set_recipients "$FILE"
+
+# Encrypt
+mkdir -p "$KEYDIR/`dirname $FILE`"
+
+if [ "$BASENAME" == "encrypt" ]; then
+  # Only display directions if we're running encrypt, not encrypt-batch
+  if [ "$UNENCRYPTED_FILE" == "-" ]; then
+    echo "Type your message and finish your input with EOF (Ctrl-D)."
+  fi
+fi
+
+$GPG --use-agent --armor -e -s $(keyringer_recipients "$RECIPIENTS_FILE") --yes --output "$KEYDIR/$FILE" "$UNENCRYPTED_FILE"
+
+err="$?"
+
+if [ "$err" != "0" ]; then
+  exit "$err"
+fi
+
+if [ "$UNENCRYPTED_FILE" != "-" ]; then
+  echo "Done. PLEASE WIPE the non-encrypted $UNENCRYPTED_FILE."
+fi
+
+# Stage
+if [ -d "$BASEDIR/.git" ]; then
+  keyringer_exec git "$BASEDIR" add "keys/$FILE"
+fi
+
+exit "$?"

@@ -111,20 +111,71 @@ function keyringer_is_git {
   fi
 }
 
+# Check the security of a temporary folder
+function keyringer_check_tmp {
+  local path="$1"
+  local minor
+  local mode
+
+  if [ -z "$path" ]; then
+    return
+  fi
+
+  # Mode check
+  if [ "`stat -c "%A" $path`" != "drwxrwxrwt" ]; then
+    return 1
+  fi
+
+  # Ramdisk check
+  if [ -x "/sbin/udevadm" ]; then
+    minor="$(/sbin/udevadm info --device-id-of-file "$path" | cut -d : -f 1)"
+  elif which mountpoint &> /dev/null; then
+    minor="$(mountpoint -d $(df "$path" | sed -n '$p' | awk '{print $NF}') | cut -d : -f 1)"
+  fi
+
+  if [ ! -z "$minor" ]; then
+    return $minor
+  else
+    return 1
+  fi
+}
+
 # Setup a temporary file
 function keyringer_set_tmpfile {
+  local tmp
+  local candidate
+  local candidates="/tmp /run/shm $TMP"
+
   if [ -z "$BASEDIR" ]; then
     echo "Please set BASEDIR before creating a tmp file"
     exit 1
   fi
 
-  if [ -z "$1" ]; then
-    template="$BASEDIR/tmp/keyringer.XXXXXXXXXX"
-  else
-    template="$BASEDIR/tmp/$1.XXXXXXXXXX"
+  # Ramdisk check
+  for candidate in $candidates; do
+    if keyringer_check_tmp $candidate; then
+      tmp="$candidate/keyringer.`whoami`"
+      break
+    fi
+  done
+
+  # Set base temp folder
+  if [ -z "$tmp" ]; then
+    echo "WARNING: neither one of $candidates is mounted in a tmpfs/ramdisk, using $BASEDIR/tmp as fallback."
+    echo "Make sure that $BASEDIR is atop of an encrypted volume."
+    echo "Press any key to continue, Ctrl-C to abort"
+    read key
+    tmp="$BASEDIR/tmp"
   fi
 
-  mkdir -p "$BASEDIR/tmp"
+  # Determine template
+  if [ -z "$1" ]; then
+    template="$tmp/keyringer.XXXXXXXXXX"
+  else
+    template="$tmp/XXXXXXXXXX.$1"
+  fi
+
+  mkdir -p "$tmp"
   keyringer_git_ignore 'tmp/*'
 
   if [ "$2" == "-d" ]; then
@@ -141,13 +192,46 @@ function keyringer_set_tmpfile {
   trap "keyringer_unset_tmpfile $TMPWORK; exit" INT TERM EXIT
 }
 
+# Shred files
+function keyringer_shred {
+  local path="$1"
+  local tool
+  local message="Removing"
+
+  if [ -z "$path" ]; then
+    return
+  elif [ ! -e "$path" ]; then
+    return
+  fi
+
+  # Get shred implementation
+  if which wipe &> /dev/null; then
+    tool="wipe"
+  elif which shred &> /dev/null; then
+    tool="shred"
+  else
+    # Worst implementation
+    message="WARNING $message"
+    tool="rm"
+  fi
+
+  echo "$message $path using $tool..."
+
+  if [ -d "$path" ]; then
+    find $path -exec $tool -f {} \;
+    rmdir $path
+  else
+    $tool -f "$path"
+  fi
+}
+
 # Remove a temporary file
 function keyringer_unset_tmpfile {
   if [ -z "$1" ]; then
     echo "No tmp file set"
   fi
 
-  rm -f "$1"
+  keyringer_shred "$1"
 
   if [ "$?" != "0" ]; then
     echo "Warning: could not delete file $1. Please delete it manually as it might have sensitive information."
@@ -342,16 +426,22 @@ function keyringer_get_new_file {
   # File must not contain spaces
   if [ ! -z "$2" ] ; then
     FILE="`echo "$*" | sed -e 's/ /_/g'`"
-    echo "File $* has spaces, secret will be named as $FILE..."
   else
     FILE="$1"
   fi
 
   # Sanitize and complete file name
-  FILE="`echo $FILE | sed -e s/[^A-Za-z0-9.]/_/g`"
+  FILE="`echo $FILE | sed -e s/[^A-Za-z0-9.\/\-]/_/g`"
+
+  # Warn user about file name change
+  if [ "`basename $*`" != "`basename $FILE`" ]; then
+    echo "Sanitizing destination filename to `basename $FILE`"
+  fi
+
+  # Complete file name
   FILE="$(keyringer_filename "$FILE")"
-  
-  if [ -z "$FILE" ]; then
+
+  if [ -z "$*" ]; then
     keyringer_action_usage
     exit 1
   fi
@@ -361,7 +451,7 @@ function keyringer_get_new_file {
 function keyringer_get_command {
   # Aditional parameters
   COMMAND="$1"
-  
+
   if [ -z "$COMMAND" ]; then
     keyringer_action_usage command
     exit 1
@@ -390,9 +480,16 @@ function keyringer_show_actions {
 
 # Usage
 function keyringer_usage {
-  printf "Usage: %s <keyring> <action> [arguments]\n" "$BASENAME"
-  printf "Available commands: \n"
+  local keyrings="$(ls --color=never `dirname $CONFIG` | sed -e 's/config//' | xargs)"
+
+  printf "Usage: %s <keyring> <action> [arguments]\n\n" "$BASENAME"
+  printf "Available commands: \n\n"
   keyringer_show_actions | sed -e 's/^/\t/'
+  printf "\tinit <path> [remote]\n\n" $BASENAME
+
+  if [ ! -z "$keyrings" ]; then
+    printf "Available keyrings: %s \n" "$keyrings"
+  fi
 }
 
 # Check recipients
@@ -504,7 +601,7 @@ function keyringer_set_new_recipients {
 function keyringer_create_new_recipients {
   if [ ! -e "$1" ]; then
     mkdir -p "`dirname $1`"
-    echo "# Use entries in the form of 'john@doe.com XXXXXXXX" > "$1"
+    echo "# Use entries in the form of 'john@doe.com XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'" > "$1"
     echo "" >> "$1"
   fi
 }
