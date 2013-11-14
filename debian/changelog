@@ -1,3 +1,10 @@
+keyringer (0.2.7-1~1.gbp39cba8) unstable; urgency=low
+
+  * Adding wipe into package recommendations
+  * Packaging upstream 0.2.7
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Thu, 14 Nov 2013 18:39:50 -0200
+
 keyringer (0.2.6-1) unstable; urgency=low
 
   * Adding debian/gbp.conf
