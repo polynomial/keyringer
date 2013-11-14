@@ -15,7 +15,7 @@
 #
 
 PACKAGE = keyringer
-VERSION = 0.2.6
+VERSION = $(shell ./keyringer | head -n 1 | cut -d ' ' -f 2)
 PREFIX ?= /usr/local
 INSTALL = /usr/bin/install
 
@@ -49,4 +49,3 @@ build_man:
 
 tarball:
 	git archive --prefix=keyringer-$(VERSION)/ --format=tar HEAD | bzip2 >../tarballs/keyringer-$(VERSION).tar.bz2
-	#cd ../tarballs && ln -s keyringer-$(VERSION).tar.bz2 keyringer-$(VERSION).orig.tar.bz2
