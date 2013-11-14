@@ -4,7 +4,7 @@
 #
 
 # Load functions
-LIB="`dirname $0`/../../lib/keyringer/functions"
+LIB="`dirname $0`/../functions"
 source "$LIB" || exit 1
 
 # Get file
@@ -13,11 +13,13 @@ keyringer_get_file "$2"
 # Set recipients file
 keyringer_set_recipients "$FILE"
 
-# Warn user
-echo "Make sure that $BASEDIR is atop of an encrypted volume."
+# Get original file EXTENSION
+FILENAME="$(basename "$FILE" .asc)"
+FILENAME="$(basename "$FILENAME")"
+EXTENSION="${FILENAME##*.}"
 
 # Set a tmp file
-keyringer_set_tmpfile edit
+keyringer_set_tmpfile $BASENAME.$EXTENSION
 
 # Decrypt the information to the file
 $GPG --yes -o "$TMPWORK" --use-agent -d "$KEYDIR/$FILE"

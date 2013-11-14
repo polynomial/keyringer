@@ -1,9 +1,14 @@
 [[!meta title="Keyringer: development guidelines and workflow"]]
 
+Index
+-----
+
+[[!toc levels=4]]
+
 Development environment
 -----------------------
 
-The following steps needs to be run just once.
+The following steps needs to be run just once for each arch and distro version.
 
 ### Create the `debian/` structure
 
@@ -13,7 +18,7 @@ The following steps needs to be run just once.
 
 ### Setup a sid pbuilder chroot
 
-    DIST=sid sudo pbuilder create --debootstrapopts --variant=buildd
+    DIST=sid git-pbuilder create
 
 ### Setup a sid cowbuilder chroot
 
@@ -26,7 +31,7 @@ These steps should be run once in a while to ensure we have an up to date packag
 
 ### Pbuilder
 
-    DIST=sid sudo pbuilder update
+    DIST=sid git-pbuilder update
 
 ### Cowbuilder
 
@@ -46,6 +51,7 @@ Prepare the source code:
 
 Commit and tag a release:
 
+    VERSION="X.Y.Z"
     git commit -a -m "Keyringer $VERSION"
     git tag -s $VERSION -m "Keyringer $VERSION"
 
@@ -60,7 +66,7 @@ Sign the release ([see backupninja development guidelines](https://labs.riseup.n
 
 Upload the release:
 
-    scp keyringer-$VERSION.tar.bz2* server:/var/sites/keyringer/releases/
+    scp keyringer-$VERSION.tar.bz2* keyringer:/var/sites/keyringer/releases/
     cd -
 
 Update the debian branch:
@@ -82,18 +88,44 @@ Run lintian (or [add it to your pbuilder hooks](http://askubuntu.com/questions/1
     lintian --info --display-info --pedantic --color auto \
      ../build-area/keyringer_$VERSION*.changes
 
+Create a signed tag in the debian branch:
+
+    git-buildpackage --git-tag-only --git-sign-tags
+
 Notes:
 
 * `git-import-orig` takes care of running `pristine-tar commit`, of merging of the tag and orig tarball into the upstream branch, and then it merges the result into the debian branch. With the above configuration, it also runs git-dch to do the bulk of the work in `debian/changelog`.
 * To build a development package, checkout the debian branch, merge master, run `git-dch --auto --snapshot` and build. 
 
-Adding a subcommand
--------------------
+Adding or changing a subcommand
+-------------------------------
 
-When adding a new subcommand, ensure:
+When adding a new subcommand or changing subcommand behavior, ensure:
 
+* Documentation is updated.
 * Manpage is updated.
 * Shell completions are updated.
+
+Test environment
+----------------
+
+Setup:
+
+    keyringer test init ~/code/tests/keyringer
+
+Teardown:
+
+    rm -rf ~/code/tests/keyringer
+    rm ~/.keyringer/test
+    sed -i -e '/^test=/d' ~/.keyringer/config
+
+Translation
+-----------
+
+Run just once:
+
+    cd share/man
+    po4a-gettextize -f text -m keyringer.1.mdwn -p keyringer.pot
 
 References
 ----------
@@ -104,3 +136,5 @@ References
 * [git-pbuilder](https://wiki.debian.org/git-pbuilder).
 * [PackagingWithGit - Debian Wiki](https://wiki.debian.org/PackagingWithGit).
 * [Generating pristine tarballs from git repositories](http://joeyh.name/blog/entry/generating_pristine_tarballs_from_git_repositories/).
+* [Debian Packaging](https://wiki.debian.org/Packaging).
+* [Debian Upstream Guide](https://wiki.debian.org/UpstreamGuide).

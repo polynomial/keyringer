@@ -4,7 +4,7 @@
 #
 
 # Load functions
-LIB="`dirname $0`/../../lib/keyringer/functions"
+LIB="`dirname $0`/../functions"
 source "$LIB" || exit 1
 
 # Get file
@@ -20,9 +20,6 @@ if [ "$BASENAME" == "append" ]; then
   printf "\n%s currently has %d lines\n\n" "$FILE" "${#CONTENT[@]}"
   printf "Now please write the content to be appended on %s, finnishing with Ctrl-D:\n" "$FILE"
 fi
-
-# FIXME: dkg doesn't know how to check that this does proper escaping
-# (2010-11-16)
 
 APPEND=($(cat -))
 
