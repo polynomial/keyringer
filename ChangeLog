@@ -1,3 +1,33 @@
+2013-11-26 - 0.2.9 Silvio Rhatto  <rhatto@riseup.net>
+
+  Added 'tree' action
+
+  Added 'rm' alias to 'del' action
+
+  Set .gitignore during initialization and when using tmp inside the repository
+
+  Pass options to git-rm at del action
+
+  Simpler ramdisk/tmpfs check at keyringer_check_tmp
+
+  Better mode check on keyringer_check_tmp (closes #30)
+
+	Fixed minor typos
+
+	Man page update
+
+	Temp folder priority set to "$TMPDIR $TMP /tmp /run/shm"
+
+	Avoid bash arrays on append action (closes #26)
+
+	Shell completion enhancements.
+
+	Fixing keyringer_has_action() to correctly handle "/" and ".".
+
+	Action ls now supports leading slash ("/").
+
+	Support for encrypting a whole tree (closes #21)
+
 2013-11-14 - 0.2.8 Silvio Rhatto  <rhatto@riseup.net>
 
 	Updated development workflow and version scheme
