@@ -59,7 +59,7 @@ function keyringer_has_action {
    exit 1
  fi
 
- if [ -e "$ACTIONS/$1" ]; then
+ if [ -e "$ACTIONS/$1" ] && [ ! -d "$ACTIONS/$1" ]; then
    true
  else
    false
@@ -114,37 +114,23 @@ function keyringer_is_git {
 # Check the security of a temporary folder
 function keyringer_check_tmp {
   local path="$1"
-  local minor
-  local mode
-
-  if [ -z "$path" ]; then
-    return
-  fi
+  local mount
 
   # Mode check
-  if [ "`stat -c "%A" $path`" != "drwxrwxrwt" ]; then
+  if [ -z "$path" ] || [ ! -d "$path" ] || [ ! -w "$path" ] || [ ! -x "$path" ]; then
     return 1
   fi
 
   # Ramdisk check
-  if [ -x "/sbin/udevadm" ]; then
-    minor="$(/sbin/udevadm info --device-id-of-file "$path" | cut -d : -f 1)"
-  elif which mountpoint &> /dev/null; then
-    minor="$(mountpoint -d $(df "$path" | sed -n '$p' | awk '{print $NF}') | cut -d : -f 1)"
-  fi
-
-  if [ ! -z "$minor" ]; then
-    return $minor
-  else
-    return 1
-  fi
+  mount="`df "$path" | sed -n '$p' | awk '{ print $NF }'`"
+  mount -l -t tmpfs | awk '{ print $3 }' | grep -q -e "^$mount$"
 }
 
 # Setup a temporary file
 function keyringer_set_tmpfile {
   local tmp
   local candidate
-  local candidates="/tmp /run/shm $TMP"
+  local candidates="$TMPDIR $TMP /tmp /run/shm"
 
   if [ -z "$BASEDIR" ]; then
     echo "Please set BASEDIR before creating a tmp file"
@@ -166,6 +152,9 @@ function keyringer_set_tmpfile {
     echo "Press any key to continue, Ctrl-C to abort"
     read key
     tmp="$BASEDIR/tmp"
+
+    # Just to be sure
+    keyringer_git_ignore 'tmp/*'
   fi
 
   # Determine template
@@ -176,7 +165,6 @@ function keyringer_set_tmpfile {
   fi
 
   mkdir -p "$tmp"
-  keyringer_git_ignore 'tmp/*'
 
   if [ "$2" == "-d" ]; then
     TMPWORK="$(mktemp -d "$template")"
@@ -431,10 +419,10 @@ function keyringer_get_new_file {
   fi
 
   # Sanitize and complete file name
-  FILE="`echo $FILE | sed -e s/[^A-Za-z0-9.\/\-]/_/g`"
+  FILE="`echo $FILE | sed -e 's/[^A-Za-z0-9.\/\-]/_/g'`"
 
   # Warn user about file name change
-  if [ "`basename $*`" != "`basename $FILE`" ]; then
+  if [ "`basename "$*"`" != "`basename $FILE`" ]; then
     echo "Sanitizing destination filename to `basename $FILE`"
   fi
 

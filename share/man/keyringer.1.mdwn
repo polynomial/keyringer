@@ -56,6 +56,11 @@ ls <*path*>
     if *path* is specified. Like the git wrapper, this is a wrapper around the *LS(1)*
     command.
 
+tree <*path*>
+:   List contents from the toplevel repository *keys* folder or from relative paths
+    if *path* is specified using a tree-like format. Like the ls wrapper, this is a
+    wrapper around the *TREE(1)* command.
+
 # SECRET MANIPULATION ACTIONS
 
 All secret manipulation actions operate upon a *secret* which is the pathname
@@ -88,16 +93,21 @@ del <*secret*>
     To completely remove a file from a keyring, you should also rewrite the Git
     history yourself.
 
+rm <*secret*>
+:   Alias for *del* action.
+
 edit <*secret*>
 :   Edit a secret by temporarily decrypting it, opening the decrypted copy into the 
     text editor defined by the *$EDITOR* environment variable and then re-encrypting it.
 
 encrypt <*secret*> [*file*]
 :   Encrypts content from standard input or *file* into *secret* pathname. No spaces
-    are supported in the *secret* name.
+    are supported in the *secret* name. If *file* is actually a folder, keyringer
+    will recursivelly encrypt all it's contents.
 
-encrypt-batch <*secret*>
-:   Encrypt content, batch mode.
+encrypt-batch <*secret*> [*file*]
+:   Encrypt content, batch mode. Behavior is identical to *encrypt* action, but less
+    verbose. Useful inside scripts.
 
 genpair <*ssh*|*gpg*|*ssl*|*ssl-self*> [*options*]
 :   Wrapper to generate encryption key-pairs, useful for automated key deployment.
@@ -153,7 +163,7 @@ recipients <*ls*|*edit*> <*recipients-file*>
     For instance, if a user encrypts a secret to a file in the keyring repository's
     *accounting* folder, a *recipients-file* under *accounting* will be used.
     Encrypting a secret into *accounting/bank-accounts* will result in a file
-   `$KEYRING_FOLDER/keys/accounting/bank-accounts.asc` encrypted using the public
+    `$KEYRING_FOLDER/keys/accounting/bank-accounts.asc` encrypted using the public
     keys listed in the config file`$KEYRING_FOLDER/config/recipients/accounting`.
 
     Each line in a recipients file has entries in the format

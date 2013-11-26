@@ -45,7 +45,18 @@ install: clean
 	@make install_lib install_bin install_doc install_man install_completion
 
 build_man:
+	# Pipe output to sed to avoid http://lintian.debian.org/tags/hyphen-used-as-minus-sign.html
+	# Fixed in http://johnmacfarlane.net/pandoc/releases.html#pandoc-1.10-2013-01-19
 	pandoc -s -w man share/man/keyringer.1.mdwn -o share/man/keyringer.1
+	sed -i -e 's/--/\\-\\-/g' share/man/keyringer.1
 
 tarball:
 	git archive --prefix=keyringer-$(VERSION)/ --format=tar HEAD | bzip2 >../tarballs/keyringer-$(VERSION).tar.bz2
+
+release:
+	@make build_man
+	git commit -a -m "Keyringer $(VERSION)"
+	git tag -s $(VERSION) -m "Keyringer $(VERSION)"
+	@make tarball
+	gpg --armor --detach-sign --output ../tarballs/keyringer-$(VERSION).tar.bz2.asc ../tarballs/keyringer-$(VERSION).tar.bz2
+	scp ../tarballs/keyringer-$(VERSION).tar.bz2* keyringer:/var/sites/keyringer/releases/
