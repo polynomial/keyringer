@@ -1,3 +1,12 @@
+keyringer (0.2.9-1) unstable; urgency=low
+
+  * Point Vcs-Browser to the debian branch
+  * Updating Standards-Version to 3.9.5.0
+  * Added 'tree' package to Recommends
+  * Keyringer 0.2.9
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Tue, 26 Nov 2013 17:18:59 -0200
+
 keyringer (0.2.8-1) unstable; urgency=low
 
   * Keyringer 0.2.8
