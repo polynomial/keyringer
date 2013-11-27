@@ -3,7 +3,7 @@ Section: misc
 Priority: extra
 Maintainer: Silvio Rhatto <rhatto@riseup.net>
 Build-Depends: debhelper (>= 9.20120909~)
-Standards-Version: 3.9.5.0
+Standards-Version: 3.9.5
 Homepage: https://keyringer.pw
 Vcs-Git: git://git.sarava.org/keyringer.git
 Vcs-Browser: https://git.sarava.org/?p=keyringer.git;a=shortlog;h=refs/heads/debian
