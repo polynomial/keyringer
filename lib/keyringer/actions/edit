@@ -24,6 +24,7 @@ keyringer_set_tmpfile $BASENAME.$EXTENSION
 # Decrypt the information to the file
 $GPG --yes -o "$TMPWORK" --use-agent -d "$KEYDIR/$FILE"
 
+# Action check
 if [ "$BASENAME" == "edit" ]; then
   APP="$EDITOR"
 elif [ "$BASENAME" == "open" ]; then
@@ -43,5 +44,18 @@ $APP "$TMPWORK"
 # Encrypt again
 $GPG --yes -o "$KEYDIR/$FILE" --use-agent --armor -e -s $(keyringer_recipients "$RECIPIENTS_FILE") "$TMPWORK"
 
+# Check exit status
+errcrypt="$?"
+
 # Remove temp file
 keyringer_unset_tmpfile "$TMPWORK"
+
+# Check exit status again
+errwipe="$?"
+
+# Error handling must be done after temp file removal
+if [ "$errcrypt" != "0" ]; then
+  exit "$errcrypt"
+elif [ "$errwipe" != "0" ]; then
+  exit $errwipe
+fi

@@ -70,10 +70,10 @@ _keyringer() {
 
   # Process config
   source $config/config
-  keyrings="`ls --color=never $config | sed -e 's/config//' | xargs`"
+  keyrings="`ls --color=never $config | sed -e '/^config$/d' | xargs`"
 
   # Available instances
-  instances="`echo $keyrings | sed -e 's/ /\\\|/g'`"
+  instances="`echo $keyrings | sed -e 's/ /$\\\|^/g' -e 's/^/^/' -e 's/$/$/'`"
 
   # The current instance
   instance="${COMP_WORDS[1]}"
@@ -94,7 +94,7 @@ _keyringer() {
       recipients)
         opts="ls edit"
         ;;
-      ls|tree|encrypt|encrypt-batch|decrypt|edit|append|append-batch|del|rm|recrypt|open)
+      ls|tree|mkdir|encrypt|encrypt-batch|decrypt|edit|append|append-batch|del|rm|recrypt|open|clip|xclip)
         cur="`echo ${cur} | sed -e "s|^/*||"`" # avoid leading slash
         opts="$(bash -c "set -f && export KEYRINGER_CHECK_VERSION=false && keyringer $instance ls -p -d ${cur}*" 2> /dev/null)"
         ;;

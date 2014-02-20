@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# List keys.
+# Create folders.
 #
 
 # Load functions
@@ -14,6 +14,6 @@ CWD="`pwd`"
 shift
 ARGS="`echo "$*" | sed -e "s|^/*||"`"
 
-# Run list command
-cd "$KEYDIR/$RELATIVE_PATH" && ls $ARGS
+# Run mkdir command
+cd "$KEYDIR/$RELATIVE_PATH" && mkdir -p $ARGS
 cd "$CWD"

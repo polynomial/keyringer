@@ -37,6 +37,9 @@ Keyringer has three types of actions:
 
 # REPOSITORY LOOKUP AND MANIPULATION ACTIONS
 
+find <*expression*>
+:   Find secrets in the repository.
+
 init <*path*> [*remote*]
 :   Initialize a new keyringer repository. If a *remote* URL is specified, keyringer will
     clone an existing repository.
@@ -56,10 +59,30 @@ ls <*path*>
     if *path* is specified. Like the git wrapper, this is a wrapper around the *LS(1)*
     command.
 
+mkdir <*path*>
+:   Create a directory inside the repository *keys* folder.
+
+:rmdir <*path*>
+:   Remove an empty folder inside the repository *keys* folder.
+
 tree <*path*>
 :   List contents from the toplevel repository *keys* folder or from relative paths
     if *path* is specified using a tree-like format. Like the ls wrapper, this is a
     wrapper around the *TREE(1)* command.
+
+shell
+:   Run keyringer on interactive mode from a built-in command-line prompt where
+    all other actions can be called and are operated from the current selected
+    keyring.
+
+    An additional "cd" internal command is available for directory navigation.
+
+    All <*secret*> parameters from actions invoked from the shell are called
+    relatively from the current selected directory.
+
+teardown
+:   Remove permanently a local copy of a repository, very dangerous if you
+    have just a single copy.
 
 # SECRET MANIPULATION ACTIONS
 
@@ -96,6 +119,9 @@ del <*secret*>
 rm <*secret*>
 :   Alias for *del* action.
 
+mv <*secret*> <*dest*>
+:   Rename a secret.
+
 edit <*secret*>
 :   Edit a secret by temporarily decrypting it, opening the decrypted copy into the 
     text editor defined by the *$EDITOR* environment variable and then re-encrypting it.
@@ -124,6 +150,12 @@ recrypt <*secret*>
     into the recipient configuration. If no *secret* is given, all secrets in the repository
     are re-encrypted.
 
+clip <*secret*>
+:   Copy the first line of a secret to the clipboard, following password-store convention.
+
+xclip <*secret*>
+:   Alis to clip action.
+
 # CONFIGURATION ACTIONS
 
 commands
@@ -150,6 +182,9 @@ preferences <*ls*|*edit*|*add*>
 
 usage
 :   Show keyringer usage information.
+
+help
+:   Alias for usage action.
 
 recipients <*ls*|*edit*> <*recipients-file*>
 :   List, create or edit recipients configuration.
