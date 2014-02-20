@@ -17,4 +17,4 @@ fi
 
 # Append content to an existing secret
 ( keyringer_exec decrypt "$BASEDIR" "$FILE" && cat ) | \
-  keyringer_exec encrypt-batch $BASEDIR $FILE
+  keyringer_exec encrypt-batch "$BASEDIR" "$FILE"

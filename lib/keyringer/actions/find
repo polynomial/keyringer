@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# List keys.
+# Find secrets.
 #
 
 # Load functions
@@ -14,6 +14,6 @@ CWD="`pwd`"
 shift
 ARGS="`echo "$*" | sed -e "s|^/*||"`"
 
-# Run list command
-cd "$KEYDIR/$RELATIVE_PATH" && ls $ARGS
+# Run find command
+cd "$KEYDIR/$RELATIVE_PATH" && find -iname "*$ARGS*" | sed -e 's|^./||g'
 cd "$CWD"
