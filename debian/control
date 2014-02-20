@@ -11,7 +11,7 @@ Vcs-Browser: https://git.sarava.org/?p=keyringer.git;a=shortlog;h=refs/heads/deb
 Package: keyringer
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, git, gnupg, gawk | mawk
-Recommends: openssl, xdg-utils, wipe, tree
+Recommends: openssl, xdg-utils, wipe, tree, xclip
 Description: Distributed secret management using GnuPG and Git
  Keyringer lets you manage and share secrets using GnuPG and Git in a
  distributed fashion. It has custom commands to encrypt, decrypt and

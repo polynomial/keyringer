@@ -1,3 +1,10 @@
+keyringer (0.3-1) unstable; urgency=low
+
+  * Added xclip into Recommends
+  * Keyringer 0.3
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Thu, 20 Feb 2014 11:10:24 -0300
+
 keyringer (0.2.9-2) unstable; urgency=low
 
   * Closes: #732092
