@@ -7,6 +7,7 @@
 #   - git://lair.fifthhorseman.net/~mjgoins/cur
 #   - https://gitorious.org/key-report
 #   - https://github.com/ilf/gpg-maintenance.git
+#   - https://github.com/EtiennePerot/parcimonie.sh
 #   - https://gaffer.ptitcanardnoir.org/intrigeri/code/parcimonie/
 #
 # This script can run from a crontab, client or server side to check
@@ -22,10 +23,7 @@ source "$LIB" || exit 1
 # Pull the keyring repository.
 # Git maintenance operations.
 # Fetch absent keys from all recipients.
-# TODO: Check if keys in all recipients files are about to expire.
-# TODO: Time to expire can be configured via repository options.
-# TODO: Users can be alerted by mail if configured by user preferences.
-# TODO: Outgoing emails can be encrypted.
+# Check key expirations
 
 # This should be done here:
 # TODO: Check canaries' timestamps, warning by mail if configured by user preferences.
