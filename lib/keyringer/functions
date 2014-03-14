@@ -519,14 +519,18 @@ function keyringer_usage {
 
   printf "Keyringer $KEYRINGER_VERSION\n"
   printf "Usage: %s <keyring> <action> [arguments]\n\n" "$BASENAME"
-  printf "Available commands: \n\n"
-  keyringer_show_actions | sed -e 's/^/\t/'
 
   # Display only when not in a keyring context
   if [ ! -z "$keyrings" ] && [ -z "$1" ]; then
-    printf "\tinit <path> [remote]\n\n" $BASENAME
     printf "Available keyrings: %s \n" "$keyrings"
   fi
+
+  # Show available actions
+  printf "Available actions: \n\n"
+  if [ ! -z "$keyrings" ] && [ -z "$1" ]; then
+    printf "\tinit <path> [remote]\n" $BASENAME
+  fi
+  keyringer_show_actions | sed -e 's/^/\t/'
 }
 
 # Check repository integrity
@@ -707,10 +711,10 @@ function keyringer_check_expiration {
   for expiry in `gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^sub | cut -d : -f 7`; do
     if [[ "$seconds" -lt "$expiry" ]]; then
       not_expired="1"
-    fi
 
-    if [[ "$ahead" -gt "$expiry" ]] && [ "$BASENAME" == "check" ]; then
-      echo "Warning: subkey from $recipient will expire soon, on `date --date="@$expiry"`"
+      if [[ "$ahead" -gt "$expiry" ]] && [ "$BASENAME" == "check" ]; then
+        echo "Warning: subkey from $recipient will expire soon, on `date --date="@$expiry"`"
+      fi
     fi
   done
 
@@ -772,10 +776,35 @@ function keyringer_set_new_recipients {
 
 # Create a new recipients file
 function keyringer_create_new_recipients {
-  if [ ! -e "$1" ]; then
-    mkdir -p "`dirname $1`"
+  local recipients="$1"
+  local recipient
+  local key
+  local uid
+  local fpr
+
+  if [ ! -e "$recipients" ]; then
+    mkdir -p "`dirname $recipients`"
     echo "# Use entries in the form of 'john@doe.com XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'" > "$1"
-    echo "" >> "$1"
+    echo "" >> "$recipients"
+
+    # Try to get an initial recipient
+    if [ -e "$HOME/.gnupg/gpg.conf" ]; then
+      recipient="`grep -e "^default-key" ~/.gnupg/gpg.conf | cut -d ' ' -f 2`"
+
+      if [ ! -z "$recipient" ]; then
+        key="`gpg --fingerprint --with-colons $recipient 2> /dev/null`"
+
+        if [ "$?" == "0" ]; then
+          fpr="`echo "$key" | grep -e '^fpr:' | head -1 | cut -d : -f 10`"
+          uid="`echo "$key" | grep -e '^uid:' | head -1 | cut -d : -f 10 | sed -e 's|^[^<]*<||' -e 's|>$||'`"
+
+          if [ ! -z "$uid" ] && [ ! -z "$fpr" ]; then
+            echo "Default key $fpr ($uid) found at ~/.gnupg/gpg.conf, using as initial recipient."
+            echo "$uid $fpr" >> "$recipients"
+          fi
+        fi
+      fi
+    fi
   fi
 }
 

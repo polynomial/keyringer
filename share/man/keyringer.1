@@ -50,6 +50,11 @@ Also, an entry will be added to \f[C]$HOME/.keyringer/config\f[]
 allowing keyringer to find the keyring by its alias.
 .RE
 .TP
+.B destroy
+Alias for \f[I]teardown\f[] action.
+.RS
+.RE
+.TP
 .B git <\f[I]action\f[]> <\f[I]options\f[]>
 Git wrapper that operates from the toplevel keyring repository.
 You can issue any \f[I]GIT(1)\f[] subcommand with this action to have it
@@ -70,7 +75,7 @@ Create a directory inside the repository \f[I]keys\f[] folder.
 .RS
 .RE
 .TP
-.B :rmdir <\f[I]path\f[]>
+.B rmdir <\f[I]path\f[]>
 Remove an empty folder inside the repository \f[I]keys\f[] folder.
 .RS
 .RE
@@ -99,6 +104,11 @@ called relatively from the current selected directory.
 .B teardown
 Remove permanently a local copy of a repository, very dangerous if you
 have just a single copy.
+.RS
+.RE
+.TP
+.B check
+Run maintenance checks in a keyring.
 .RS
 .RE
 .SH SECRET MANIPULATION ACTIONS
