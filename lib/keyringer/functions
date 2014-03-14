@@ -301,6 +301,11 @@ function keyringer_set_env {
   # Upgrade configuration
   keyringer_upgrade
 
+  # Check repository integrity
+  if [ "$BASENAME" == "check" ]; then
+    keyringer_check_repository
+  fi
+
   # Check recipients file
   keyringer_check_recipients $SUBCOMMAND
 
@@ -403,6 +408,17 @@ function keyringer_upgrade {
   fi
 }
 
+# Get an option
+#
+# Given that options are shared among users through the
+# repository, we can't just "source $OPTIONS" as we would
+# be opening a simple arbitrary code execution hole.
+#
+# TODO
+function keyringer_get_option {
+  false
+}
+
 # Get a file argument
 function keyringer_get_file {
   FILE="$(keyringer_filename "$RELATIVE_PATH/$1")"
@@ -413,11 +429,10 @@ function keyringer_get_file {
   elif [ ! -f "$KEYDIR/$FILE" ]; then
     # Try to find a similar file
     count=0
-    candidates=(`keyringer_exec find "$BASEDIR" "$1" | grep -e '.asc$'`)
+    candidates=(`keyringer_exec find "$BASEDIR" | grep -i "$1" | grep -e '.asc$'`)
 
     if [ ! -z "$candidates" ]; then
-      echo "Could not find exact match \"$1\", please chose one"
-      echo "of the following secrets:"
+      echo "Could not find exact match \"$1\", please chose one of the following secrets:"
       echo ""
 
       for candidate in ${candidates[@]}; do
@@ -426,7 +441,7 @@ function keyringer_get_file {
       done
 
       echo ""
-      read -p "Enter option: " option
+      read -p "Enter option (Ctrl-C to abort): " option
 
       if [[ "$option" =~ ^[0-9]+$ ]] && [ ! -z "${candidates[$option]}" ]; then
         FILE="$(keyringer_filename "$RELATIVE_PATH/${candidates[$option]}")"
@@ -504,7 +519,7 @@ function keyringer_usage {
 
   printf "Keyringer $KEYRINGER_VERSION\n"
   printf "Usage: %s <keyring> <action> [arguments]\n\n" "$BASENAME"
-  printf "Available commands: \n\n"
+  printf "Available actions: \n\n"
   keyringer_show_actions | sed -e 's/^/\t/'
 
   # Display only when not in a keyring context
@@ -514,11 +529,84 @@ function keyringer_usage {
   fi
 }
 
+# Check repository integrity
+function keyringer_check_repository {
+  # Check if it's a git repository
+  if [ ! -d "$BASEDIR/.git" ]; then
+    echo "Fatal: not a git repository: $BASEDIR"
+    exit 1
+  fi
+
+  # Git maintenance operations
+  echo "Running git maintenance operations..."
+  keyringer_exec git "$BASEDIR" fsck
+  keyringer_exec git "$BASEDIR" gc --prune=all
+  echo ""
+
+  # Sync the repository
+  if [ "`keyringer_exec git "$BASEDIR" remote | wc -l`" != "0" ]; then
+    echo "Syncing git repository..."
+    keyringer_exec git "$BASEDIR" pull
+    echo ""
+  fi
+}
+
+# Receive keys from keyservers
+# TODO: gpg-maintenance trickery
+# TODO: should be controlled by user preference
+function keyringer_recv_keys {
+  local recipient="$1"
+
+  echo "Trying to receive missing key $recipient..."
+  gpg --batch --recv-keys "$recipient"
+}
+
+# Refresh keys from keyserver
+# TODO: gpg-maintenance trickery
+# TODO: should be controlled by user preference
+function keyringer_refresh_keys {
+  local recipient="$1"
+
+  echo "Trying to refresh key $recipient..."
+  gpg --batch --refresh-keys "$recipient"
+}
+
+# Check recipient size
+function keyringer_check_recipient_size {
+  local recipient="$1"
+  local size=$(echo "$recipient" | wc -c)
+
+  if (( $size < 41 )); then
+    echo "Fatal: please set the full GPG signature hash for key ID $recipient:"
+    cat <<-EOF
+
+Please provide a full OpenPGP fingerprint, for example:
+
+  john@doe.com ABCD1234ABCD12345678ABCD1234ABCD12345678
+
+Short key ids (for example, DEADBEEF or DECAF123) are not allowed in
+recipient files because they are easy to spoof. Researchers have proven
+that it is possible to build fake keys to match any possible short key
+id by using a few gigabytes of disk space, and a day of computation on
+common hardware.
+
+Otherwise, the encryption can be broken, if someone spoofs a short key
+id, and causes a participant in a keyringer repository to encrypt
+secrets to a fake key.
+EOF
+   exit 1
+ fi
+}
+
 # Check recipients
 function keyringer_check_recipients {
+  # Shall we check recipients?
   if [ "$KEYRINGER_CHECK_RECIPIENTS" == "false" ]; then
     return
   fi
+
+  # Local variables
+  local processed=":"
 
   # Check if recipients file is empty.
   if [ "`grep -vE "^#|^$" "$RECIPIENTS"/* | wc -l`" == 0 ] && [ "$SUBCOMMAND" != "edit" ]; then
@@ -539,60 +627,98 @@ function keyringer_check_recipients {
   fi
 
   for recipient in $(cat "$RECIPIENTS"/* | grep -v '^#' | awk '{ print $2 }'); do
-    size=$(echo "$recipient" | wc -c)
-    if (( $size < 41 )); then
-      echo "Fatal: please set the full GPG signature hash for key ID $recipient:"
-      cat <<-EOF
-
-Please provide a full OpenPGP fingerprint, for example:
-
-  john@doe.com ABCD1234ABCD12345678ABCD1234ABCD12345678
-
-Short key ids (for example, DEADBEEF or DECAF123) are not allowed in
-recipient files because they are easy to spoof. Researchers have proven
-that it is possible to build fake keys to match any possible short key
-id by using a few gigabytes of disk space, and a day of computation on
-common hardware.
-
-Otherwise, the encryption can be broken, if someone spoofs a short key
-id, and causes a participant in a keyringer repository to encrypt
-secrets to a fake key.
-EOF
-      exit 1
+    # Process a recipient just once
+    if echo $processed | grep -q "$recipient:"; then
+      continue
     else
-      gpg --list-key "$recipient" &> /dev/null
-      if [ "$?" != "0" ]; then
-        echo "Fatal: no such key $recipient on your GPG keyring."
-        echo "Please check for this key or fix the recipient file."
-        exit 1
+      processed="$processed$recipient:"
+    fi
+
+    # Check recipient size
+    keyringer_check_recipient_size "$recipient"
+
+    # Check if key is present
+    keyringer_check_recipient_key "$recipient"
+
+    # Refresh keys
+    if [ "$BASENAME" == "check" ] && [ "$refresh" != "no" ]; then
+      keyringer_refresh_keys "$recipient"
+      echo ""
+    fi
+
+    # Check key expiration
+    keyringer_check_expiration "$recipient"
+
+  done
+}
+
+# Check if a key is present
+function keyringer_check_recipient_key {
+  local recipient="$1"
+
+  gpg --list-key "$recipient" &> /dev/null
+  if [ "$?" != "0" ]; then
+    if [ "$BASENAME" == "check" ]; then
+      refresh="no"
+      keyringer_recvs_keys "$recipient"
+      if [ "$?" != 0 ]; then
+        echo "Error fetching $recipient from keyservers."
+        continue
       fi
+      echo ""
+    else
+      echo "Fatal: no such key $recipient on your GPG keyring."
+      echo "Please check for this key or fix the recipient file."
 
-      # Current date
-      seconds="`date +%s`"
+      exit 1
+    fi
+  fi
+}
 
-      # Check the main key
-      expiry="`gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^pub | cut -d : -f 7`"
+# Check key expiration
+function keyringer_check_expiration {
+  # Variables
+  local recipient="$1"
+  local not_expired="0"
 
-      # Check if key is expired
-      if [ ! -z "$expiry" ] && [[ "$seconds" -gt "$expiry" ]]; then
-        echo "Fatal: primary key for $recipient expired on `date --date="@$expiry"`"
-        exit 1
-      else
-        # Check the subkeys
-        for expiry in `gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^sub | cut -d : -f 7`; do
-          if [[ "$seconds" -lt "$expiry" ]]; then
-            not_expired="1"
-          fi
+  # Current date
+  seconds="`date +%s`"
 
-          if [ "$not_expired" != "1" ]; then
-            echo "Fatal: key $recipient has no keys suitable for encryption: all subkeys expired."
-            exit 1
-          fi
-        done
-      fi
+  # Check the main key
+  expiry="`gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^pub | cut -d : -f 7`"
 
+  # TODO: Time to expire can be configured via repository options.
+  ahead="$((86400 * 30 + $seconds))"
+
+  # Check if key is expired
+  if [ ! -z "$expiry" ] && [[ "$seconds" -gt "$expiry" ]]; then
+    echo "Fatal: primary key for $recipient expired on `date --date="@$expiry"`"
+    exit 1
+  fi
+
+  # Check if key is about to expire
+  # TODO: Users can be alerted by mail if configured by user preferences.
+  # TODO: Outgoing emails can be encrypted.
+  if [ "$BASENAME" == "check" ] && [ ! -z "$expiry" ] && [[ "$ahead" -gt "$expiry" ]]; then
+    echo "Warning: key $recipient will expire soon, on `date --date="@$expiry"`"
+  fi
+
+  # Check the subkeys
+  for expiry in `gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^sub | cut -d : -f 7`; do
+    if [[ "$seconds" -lt "$expiry" ]]; then
+      not_expired="1"
+    fi
+
+    if [[ "$ahead" -gt "$expiry" ]] && [ "$BASENAME" == "check" ]; then
+      echo "Warning: subkey from $recipient will expire soon, on `date --date="@$expiry"`"
     fi
   done
+
+  # All subkeys are expired
+  if [ ! -z "$expiry" ] && [ "$not_expired" != "1" ]; then
+    echo "Fatal: key $recipient has no keys suitable for encryption: all subkeys expired."
+    exit 1
+  fi
 }
 
 # Set recipients
@@ -646,10 +772,35 @@ function keyringer_set_new_recipients {
 
 # Create a new recipients file
 function keyringer_create_new_recipients {
-  if [ ! -e "$1" ]; then
-    mkdir -p "`dirname $1`"
+  local recipients="$1"
+  local recipient
+  local key
+  local uid
+  local fpr
+
+  if [ ! -e "$recipients" ]; then
+    mkdir -p "`dirname $recipients`"
     echo "# Use entries in the form of 'john@doe.com XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'" > "$1"
-    echo "" >> "$1"
+    echo "" >> "$recipients"
+
+    # Try to get an initial recipient
+    if [ -e "$HOME/.gnupg/gpg.conf" ]; then
+      recipient="`grep -e "^default-key" ~/.gnupg/gpg.conf | cut -d ' ' -f 2`"
+
+      if [ ! -z "$recipient" ]; then
+        key="`gpg --fingerprint --with-colons $recipient 2> /dev/null`"
+
+        if [ "$?" == "0" ]; then
+          fpr="`echo "$key" | grep -e '^fpr:' | head -1 | cut -d : -f 10`"
+          uid="`echo "$key" | grep -e '^uid:' | head -1 | cut -d : -f 10 | sed -e 's|^[^<]*<||' -e 's|>$||'`"
+
+          if [ ! -z "$uid" ] && [ ! -z "$fpr" ]; then
+            echo "Default key $fpr ($uid) found at ~/.gnupg/gpg.conf, using as initial recipient."
+            echo "$uid $fpr" >> "$recipients"
+          fi
+        fi
+      fi
+    fi
   fi
 }
 

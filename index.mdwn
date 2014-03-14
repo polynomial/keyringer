@@ -26,6 +26,10 @@ Just clone
 And then leave it somewhere, optionally adding it to your `$PATH` environment variable
 or package it to your preferred distro.
 
+If you're using debian `jessie` or `unstable`, just run
+
+    apt-get install keyringer
+
 Creating a keyringer repository
 -------------------------------
 
@@ -201,6 +205,9 @@ given key), but it's possible to:
 
 Never decrypt a key and write it to the disk, except if you're adding it to
 your personall keyring.
+
+Check [this page](https://wiki.koumbit.net/PasswordManagementService/SoftwareComparison)
+a comparison on different password management tools.
 
 Requirements
 ------------
