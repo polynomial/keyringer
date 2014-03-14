@@ -519,14 +519,18 @@ function keyringer_usage {
 
   printf "Keyringer $KEYRINGER_VERSION\n"
   printf "Usage: %s <keyring> <action> [arguments]\n\n" "$BASENAME"
-  printf "Available actions: \n\n"
-  keyringer_show_actions | sed -e 's/^/\t/'
 
   # Display only when not in a keyring context
   if [ ! -z "$keyrings" ] && [ -z "$1" ]; then
-    printf "\tinit <path> [remote]\n\n" $BASENAME
     printf "Available keyrings: %s \n" "$keyrings"
   fi
+
+  # Show available actions
+  printf "Available actions: \n\n"
+  if [ ! -z "$keyrings" ] && [ -z "$1" ]; then
+    printf "\tinit <path> [remote]\n" $BASENAME
+  fi
+  keyringer_show_actions | sed -e 's/^/\t/'
 }
 
 # Check repository integrity
@@ -707,10 +711,10 @@ function keyringer_check_expiration {
   for expiry in `gpg --with-colons --fixed-list-mode --list-keys "$recipient" | grep ^sub | cut -d : -f 7`; do
     if [[ "$seconds" -lt "$expiry" ]]; then
       not_expired="1"
-    fi
 
-    if [[ "$ahead" -gt "$expiry" ]] && [ "$BASENAME" == "check" ]; then
-      echo "Warning: subkey from $recipient will expire soon, on `date --date="@$expiry"`"
+      if [[ "$ahead" -gt "$expiry" ]] && [ "$BASENAME" == "check" ]; then
+        echo "Warning: subkey from $recipient will expire soon, on `date --date="@$expiry"`"
+      fi
     fi
   done
 
