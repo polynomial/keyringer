@@ -39,6 +39,18 @@ function keyringer_init {
     exit 1
   fi
 
+  # Check user configuration: git might complain if those aren't set
+  if [ -z "`git config --global --includes --get user.name`" ] || [ -z "`git config --global --includes --get user.email`" ]; then
+    echo "No git config found, so please chose a name and email address to identify your changes in the new keyring repository."
+    read -p "Enter your desired name/pseudonym: " name
+    read -p "Enter your desired email address: " email
+
+    if [ -z "$name" ] || [ -z "$email" ]; then
+      echo "Aborting."
+      exit 1
+    fi
+  fi
+
   # Setup
   if [ ! -z "$URL" ]; then
     git clone "$URL" "$BASEDIR"
@@ -93,11 +105,15 @@ function keyringer_init {
     keyringer_exec git "$BASEDIR" init
     keyringer_git_ignore 'tmp/*'
 
+    # Git configuration
+    git config user.email "$email"
+    git config user.name  "$name"
+
     # Edit default recipients
     echo "Now you have to edit the default recipient configuration to be able to encrypt secrets."
     echo "Press any key to proceed editing..."
     read key
-    keyringer $KEYRING recipients edit default
+    keyringer_exec recipients "$BASEDIR" edit default
 
     # Stage and commit
     keyringer_exec git "$BASEDIR" add .
@@ -122,7 +138,7 @@ function keyringer_dispatch {
 
 # Config
 NAME="keyringer"
-KEYRINGER_VERSION="0.3"
+KEYRINGER_VERSION="0.3.1"
 CONFIG_VERSION="0.1"
 CONFIG_BASE="$HOME/.$NAME"
 CONFIG="$CONFIG_BASE/config"
@@ -161,14 +177,20 @@ fi
 # Load functions
 source "$LIB" || exit 1
 
+# Basic checks
+if [ -z "$KEYRING" ]; then
+  keyringer_usage
+  exit 1
+elif [ ! -f "$CONFIG_BASE/$KEYRING" ] && [ "$ACTION" != "init" ]; then
+  echo "No such keyring $KEYRING"
+  exit 1
+fi
+
 # Setup main configuration and load preferences
 keyringer_config_load
 
 # Dispatch
-if [ -z "$KEYRING" ]; then
-  keyringer_usage
-  exit 1
-elif [ -z "$ACTION" ]; then
+if [ -z "$ACTION" ]; then
   # Run shell if no action were given
   keyringer $KEYRING shell
 elif [ "$ACTION" == "init" ]; then

@@ -1,3 +1,21 @@
+2014-03-14 - 0.3.1 - Silvio Rhatto  <rhatto@riseup.net>
+
+	Try to get an initial recipient (#32)
+
+	New action: check (#39)
+
+	Enhanced secret finder at keyringer_get_file and on find action
+
+	Added find action into shell completions
+
+	Using XA_PRIMARY selection at xclip action
+
+	Fixed secret paths at mv action
+
+	Do not use RELATIVE_PATH on git action
+
+	Fixed test output at xclip action
+
 2014-02-20 - 0.3 - Silvio Rhatto  <rhatto@riseup.net>
 
 	Try to find a similar file at keyringer_get_file

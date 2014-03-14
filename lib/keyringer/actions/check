@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Check a keyring.
+#
+# See also some useful OpenPGP maintenance scripts:
+#
+#   - git://lair.fifthhorseman.net/~mjgoins/cur
+#   - https://gitorious.org/key-report
+#   - https://github.com/ilf/gpg-maintenance.git
+#   - https://github.com/EtiennePerot/parcimonie.sh
+#   - https://gaffer.ptitcanardnoir.org/intrigeri/code/parcimonie/
+#
+# This script can run from a crontab, client or server side to check
+# keyringer health status.
+
+# Load functions
+LIB="`dirname $0`/../functions"
+source "$LIB" || exit 1
+
+# The following should run automatically from keyringer_check_recipients
+# and keyringer_check_repository:
+#
+# Pull the keyring repository.
+# Git maintenance operations.
+# Fetch absent keys from all recipients.
+# Check key expirations
+
+# This should be done here:
+# TODO: Check canaries' timestamps, warning by mail if configured by user preferences.
