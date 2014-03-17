@@ -34,8 +34,8 @@
 #
 #  - First, "keyringer <keyring> preferences edit # basic canary preferences".
 #
-#  - Then, add the following to your ~/.profile or wherever you want your canary
-#    be called from: "keyringer <keyring> canary".
+#  - Then, add the following to your ~/.profile or wherever you want keyringer's
+#    canary generator be called from: "keyringer <keyring> canary".
 
 # Load functions
 LIB="`dirname $0`/../functions"
