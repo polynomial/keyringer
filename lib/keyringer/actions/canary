@@ -13,8 +13,8 @@
 #     feeds configured by user preferences.
 #
 #   - Configured to generate new information once a day.
-#     If you run it more than that interval, no canary will
-#     be updated.
+#     If you run it more than once in this time span, no canary
+#     will be updated.
 #
 # A canary is stored:
 #
@@ -26,7 +26,7 @@
 #   - Can optionally be uploaded (encrypted or plain+signed) to a
 #     remote url via scp.
 #
-#   - Can optinally be included in another git repository
+#   - Can optionally be included in another git repository
 #     (encrypted or plain+signed), commited and pushed
 #     to a remote repository (ikiwiki instance, etc).
 #
@@ -34,7 +34,7 @@
 #
 #  - First, "keyringer <keyring> preferences edit # basic canary preferences".
 #
-#  - Then, add the following at your ~/.profile or wherever you want your canary
+#  - Then, add the following to your ~/.profile or wherever you want your canary
 #    be called from: "keyringer <keyring> canary".
 
 # Load functions
