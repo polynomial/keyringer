@@ -26,7 +26,7 @@ Just clone
 And then leave it somewhere, optionally adding it to your `$PATH` environment variable
 or package it to your preferred distro.
 
-If you're using debian `jessie` or `unstable`, just run
+If you're using Debian `jessie` or `unstable`, just run
 
     apt-get install keyringer
 
@@ -60,7 +60,7 @@ want to checkout it, use
 Managing recipients
 -------------------
 
-Your next step is tell keyringer the GPG key ids to encrypt files to:
+Your next step is tell keyringer the OpenPGP key IDs to encrypt files to:
 
     keyringer <keyring> recipients edit [recipient-name]
     keyringer <keyring> recipients ls
@@ -168,11 +168,11 @@ Concepts
 
 Basic idea is:
 
-  - Encrypt screts using multiple users's gpg public keys and commit the output in a git repo.
+  - Encrypt screts using multiple users's OpenPGP public keys and commit the output in a git repository.
 
   - Let users keep it in sync with the repository and the secrets are shared :)
 
-For "secrets" it's meant anything as the script work with stdin and output things to
+Secrets can be any regular file as the script work with stdin and output things to
 files, so it can be passphrases, private keys or other kind of information.
 
 With theses scripts, the workflow is more or less like this:
@@ -180,7 +180,7 @@ With theses scripts, the workflow is more or less like this:
   - You have a git repo for secret keys.
 
   - You run the "encrypt" command and paste your private key to this
-    command (so no plaintext disk write).
+    command (so no plaintext is written to disk).
 
   - The encrypt command writes an encrypted file to the repo.
 
@@ -189,15 +189,17 @@ With theses scripts, the workflow is more or less like this:
   - Optionally, other users pulls the changes but they dont need to
     decrypt anything until they need to use the keys.
 
-So it's just gpg-encrypted data atop of a git repository (one can think of a
-kind of distributed encrypted filesystem).
+In summary, keyringer data store is basically gpg-encrypted data atop of a git
+repository (one can think of a kind of distributed encrypted filesystem).
 
 Git was chosen to host encrypted info mostly for two reasos: easy to distribute
 and its the only VCS known to make easier repository history manipulation.
 
 One possible drawback: the repo has pubkey information attached, which can be
-linked to real ppl (and then disclose the information about who has access to a
-given key), but it's possible to:
+linked to real people (and then disclose the information about who has access to a
+given key).
+
+To mitigate that, it's possible to:
 
   - Keep the repo just atop of an encrypted and non-public place.        
 

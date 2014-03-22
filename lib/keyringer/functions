@@ -429,10 +429,10 @@ function keyringer_get_file {
   elif [ ! -f "$KEYDIR/$FILE" ]; then
     # Try to find a similar file
     count=0
-    candidates=(`keyringer_exec find "$BASEDIR" | grep -i "$1" | grep -e '.asc$'`)
+    candidates=(`keyringer_exec find "$BASEDIR" "$1*.asc"`)
 
     if [ ! -z "$candidates" ]; then
-      echo "Could not find exact match \"$1\", please chose one of the following secrets:"
+      echo "Could not find exact match for \"$1\", please choose one of the following secrets:"
       echo ""
 
       for candidate in ${candidates[@]}; do
@@ -544,7 +544,7 @@ function keyringer_check_repository {
   # Git maintenance operations
   echo "Running git maintenance operations..."
   keyringer_exec git "$BASEDIR" fsck
-  keyringer_exec git "$BASEDIR" gc --prune=all
+  keyringer_exec git "$BASEDIR" gc
   echo ""
 
   # Sync the repository
@@ -572,7 +572,7 @@ function keyringer_refresh_keys {
   local recipient="$1"
 
   echo "Trying to refresh key $recipient..."
-  gpg --batch --refresh-keys "$recipient"
+  gpg --batch --recv-keys "$recipient"
 }
 
 # Check recipient size
@@ -581,7 +581,7 @@ function keyringer_check_recipient_size {
   local size=$(echo "$recipient" | wc -c)
 
   if (( $size < 41 )); then
-    echo "Fatal: please set the full GPG signature hash for key ID $recipient:"
+    echo "Fatal: please set the full OpenPGP fingerprint for key ID $recipient:"
     cat <<-EOF
 
 Please provide a full OpenPGP fingerprint, for example:
@@ -652,7 +652,6 @@ function keyringer_check_recipients {
 
     # Check key expiration
     keyringer_check_expiration "$recipient"
-
   done
 }
 
@@ -671,8 +670,8 @@ function keyringer_check_recipient_key {
       fi
       echo ""
     else
-      echo "Fatal: no such key $recipient on your GPG keyring."
-      echo "Please check for this key or fix the recipient file."
+      echo "Fatal: no such key $recipient on your GnuPG keyring."
+      echo "Please retrieve this key yourself or fix the recipient file."
 
       exit 1
     fi
