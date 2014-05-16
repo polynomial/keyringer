@@ -1,18 +1,14 @@
 #!/bin/bash
 #
-# Git wrapper.
+# Git commit wrapper.
 #
 
 # Load functions
 LIB="`dirname $0`/../functions"
 source "$LIB" || exit 1
 
-# Aditional parameters
-CWD="`pwd`"
-
 # Fix positional arguments
 shift
 
 # Run git command
-mkdir -p "$BASEDIR" && cd "$BASEDIR" && git $*
-cd "$CWD"
+keyringer_exec git "$BASEDIR" commit $*

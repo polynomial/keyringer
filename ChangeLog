@@ -1,3 +1,32 @@
+2014-05-16 - 0.3.4 - Silvio Rhatto <rhatto@riseup.net>
+
+	Workaround for open/edit action returning instantaneously (#49)
+
+	Use 'nobackup' and 'nowritebackup' if VIM is set as $EDITOR (#50)
+
+	Find: rollback: use find+grep instead of 'find -iname' (#53)
+
+	Edit/open: wait for background process to finish (#49)
+
+	Edit: use encrypt action
+
+	Encrypt: support for KEYRINGER_ADD_EXTENSION environment variable
+	which controls if file extension should be appended to secret name
+
+	Genpair: generate ssh and ssl keys with 4096 bits size
+
+	Fix usage message inside keyringer shell
+
+	Fix recryption error when using gpg-agent in text mode (#55)
+
+	Be more verbose on recrypt errors
+
+	Adding "commit" action which is a wrapper around "git commit"
+
+	Align command output
+
+	Avoid viminfo if VIM is set as $EDITOR (#50)
+
 2014-03-22 - 0.3.3 - Silvio Rhatto  <rhatto@riseup.net>
 
 	Use --recv-keys instead of --refresh-keys
