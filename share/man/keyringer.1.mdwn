@@ -57,6 +57,9 @@ git <*action*> <*options*>
 :   Git wrapper that operates from the toplevel keyring repository. You can issue any
     *GIT(1)* subcommand with this action to have it applied in the keyring repository.
 
+commit [*arguments*]
+:   Alias to "git commit".
+
 ls <*path*>
 :   List contents from the toplevel repository *keys* folder or from relative paths
     if *path* is specified. Like the git wrapper, this is a wrapper around the *LS(1)*
@@ -129,8 +132,11 @@ mv <*secret*> <*dest*>
 :   Rename a secret.
 
 edit <*secret*>
-:   Edit a secret by temporarily decrypting it, opening the decrypted copy into the 
+:   Edit a secret by temporarily decrypting it, opening the decrypted copy into the
     text editor defined by the *$EDITOR* environment variable and then re-encrypting it.
+
+    Please make sure to use an *$EDITOR* which does not leak data like history buffers.
+    Keyringer tries to detect if *$EDITOR* is set to VIM and disables the *.viminfo* file.
 
 encrypt <*secret*> [*file*]
 :   Encrypts content from standard input or *file* into *secret* pathname. No spaces
@@ -245,31 +251,38 @@ $KEYRING_FOLDER/config/options
 Keyringer currently has the following limitations:
 
 1. Metadata is not encrypted, meaning that an attacker with access to a keyringer
-  repository can discover all public key IDs used for encryption, and which secrets
-  are encrypted to which keys. This can be improved in the future by encrypting
-  the repository configuration with support for the *--hidden-recipient* GnuPG
-  option.
+   repository can discover all public key IDs used for encryption, and which secrets
+   are encrypted to which keys. This can be improved in the future by encrypting
+   the repository configuration with support for the *--hidden-recipient* GnuPG
+   option and encrypted repository options.
+
+   To mitigate that, it's possible to keep the repo just atop of an encrypted and
+   non-public place.
 
 2. History is not rewritten by default when secrets are removed from a keyringer
-  repository. After a secret is removed with the *del* action, it will still be
-  available in the repository history even after a commit. This is by design
-  for the following reasons:
+   repository. After a secret is removed with the *del* action, it will still be
+   available in the repository history even after a commit. This is by design
+   for the following reasons:
 
   - It's the default behavior of the Git content tracker. Forcing the
-     deletion by default could break the expected behavior and hence limit
-     the repository's backup features, which can be helpful if someone
-     mistakenly overwrites a secret.
+    deletion by default could break the expected behavior and hence limit
+    the repository's backup features, which can be helpful if someone
+    mistakenly overwrites a secret.
 
   - History rewriting cannot be considered a security measure against the
-     unauthorized access to a secret as it doesn't automatically update all
-     working copies of the repository.
+    unauthorized access to a secret as it doesn't automatically update all
+    working copies of the repository.
 
-     In the case that the secret is a passphrase, the recommended measure
-     against such attacks is to change the passphrase, making useless the
-     knowledge of the previous secret.
+    In the case that the secret is a passphrase, the recommended measure
+    against such attacks is to change the passphrase, making useless the
+    knowledge of the previous secret.
 
-     Users wishing to edit their repository history should proceed manually
-     using the *git* action.
+    Users wishing to edit their repository history should proceed manually
+    using the *git* action.
+
+3. Keyringer does not protect data which were not encrypted to a keyring,
+   so be careful when decrypting secrets and writing them to the disk or
+   other storage media.
 
 # SEE ALSO
 

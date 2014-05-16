@@ -284,6 +284,13 @@ function keyringer_set_env {
     fi
   fi
 
+  # Avoid viminfo, see https://keyringer.pw/trac/ticket/50
+  if $EDITOR --help | grep -q -e "^VIM"; then
+    if ! echo $EDITOR | grep -q -- "-i NONE"; then
+      EDITOR="$EDITOR -i NONE '+set nowritebackup' '+set nobackup'"
+    fi
+  fi
+
   if [ ! -f "$OPTIONS" ]; then
     echo "No option config was found"
     exit 1
@@ -429,7 +436,7 @@ function keyringer_get_file {
   elif [ ! -f "$KEYDIR/$FILE" ]; then
     # Try to find a similar file
     count=0
-    candidates=(`keyringer_exec find "$BASEDIR" "$1*.asc"`)
+    candidates=(`keyringer_exec find "$BASEDIR" | grep -i "$1" | grep -e '.asc$'`)
 
     if [ ! -z "$candidates" ]; then
       echo "Could not find exact match for \"$1\", please choose one of the following secrets:"
@@ -510,7 +517,7 @@ function keyringer_action_usage {
 
 # Return available actions
 function keyringer_show_actions {
-  ls $ACTIONS
+  ls -C $ACTIONS
 }
 
 # Usage
@@ -518,7 +525,7 @@ function keyringer_usage {
   local keyrings="$(ls --color=never `dirname $CONFIG` | sed -e 's/config//' | xargs)"
 
   printf "Keyringer $KEYRINGER_VERSION\n"
-  printf "Usage: %s <keyring> <action> [arguments]\n\n" "$BASENAME"
+  printf "Usage: keyringer <keyring> <action> [arguments]\n\n"
 
   # Display only when not in a keyring context
   if [ ! -z "$keyrings" ] && [ -z "$1" ]; then
@@ -531,6 +538,7 @@ function keyringer_usage {
     printf "\tinit <path> [remote]\n" $BASENAME
   fi
   keyringer_show_actions | sed -e 's/^/\t/'
+  printf "\n"
 }
 
 # Check repository integrity
