@@ -1,3 +1,10 @@
+keyringer (0.3.7-1) unstable; urgency=low
+
+  * Added .gitignore
+  * Keyringer 0.3.7
+
+ -- Silvio Rhatto <rhatto@riseup.net>  Thu, 21 Aug 2014 17:23:21 -0300
+
 keyringer (0.3.6-1) unstable; urgency=low
 
   * Keyringer 0.3.6
